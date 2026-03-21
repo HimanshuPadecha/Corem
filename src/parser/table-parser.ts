@@ -3,10 +3,10 @@ import { Table } from "../types/table";
 
 export const tableParser = <T extends Record<string, Column>>(
   table: Table<T>,
-) => {
+) : string => {
   const { name, columns } = table;
 
-  let sqlColumns = [];
+  let sqlColumns : string[] = [];
 
   for (const [key, value] of Object.entries(columns)) {
     const { type, constraints } = value;

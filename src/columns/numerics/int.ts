@@ -1,9 +1,13 @@
 import { Column } from "../types/column";
+import { sql } from "../core/sql";
 
-type Int = Column & {
+export type Int = Column & {
   primaryKey: () => Int;
   notNull: () => Int;
   autoIncrement: () => Int;
+  unique: () => Int;
+  default: (num: number) => Int;
+  check: (condition: string) => Int;
 };
 
 export const int = (name: string): Int => {
@@ -21,6 +25,18 @@ export const int = (name: string): Int => {
     },
     notNull() {
       this.constraints.push("NOT NULL");
+      return this;
+    },
+    unique() {
+      this.constraints.push("UNIQUE");
+      return this;
+    },
+    default(num) {
+      this.constraints.push(`DEFAULT ${num}`);
+      return this;
+    },
+    check(condition) {
+      this.constraints.push(`CHECK ${sql(condition)}`);
       return this;
     },
   };
