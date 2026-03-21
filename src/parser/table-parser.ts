@@ -6,12 +6,12 @@ export const tableParser = <T extends Record<string, Column>>(
 ) => {
   const { name, columns } = table;
 
-  let sqlColumns = "";
+  let sqlColumns = [];
 
   for (const [key, value] of Object.entries(columns)) {
     const { type, constraints } = value;
-    sqlColumns += `${key} : ${type} ${constraints.join(" ")},\n`;
+    sqlColumns.push(`${key} ${type} ${constraints.join(" ")}`);
   }
 
-  return `CREATE TABLE ${name} IF NOT EXISTS (\n${sqlColumns});`;
+  return `CREATE TABLE IF NOT EXISTS ${name} (${sqlColumns.join(",")});`;
 };
