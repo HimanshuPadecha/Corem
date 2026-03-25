@@ -1,35 +1,20 @@
-import { sql } from "../core/sql";
-import { Int } from "./int";
+import { Int as BigInt } from "./int";
+import { Column } from "@/types/column";
+import { CommonConstraints } from "@/core/common-constrains";
 
-
-export const bigInt = (name: string): Int => {
-  return {
+export const bigInt = (name: string): BigInt => {
+  const base: Column = {
     name,
     type: "BIGINT",
     constraints: [],
-    primaryKey() {
-      this.constraints.push("PRIMARY KEY");
-      return this;
-    },
-    notNull() {
-      this.constraints.push("NOT NULL");
-      return this;
-    },
-    autoIncrement() {
-      this.constraints.push("AUTO_INCREMENT");
-      return this;
-    },
-    unique(){
-        this.constraints.push("UNIQUE")
-        return this
-    },
-    default(num){
-        this.constraints.push(`DEFAULT ${num}`)
-        return this
-    },
-    check(condition) {
-        this.constraints.push(`CHECK ${sql(condition)}`);
-        return this;
-      },
   };
+
+  const result = CommonConstraints(base) as unknown as BigInt;
+
+  result.autoIncrement = () => {
+    result.constraints.push("AUTO_INCREMENT");
+    return result;
+  };
+
+  return result;
 };

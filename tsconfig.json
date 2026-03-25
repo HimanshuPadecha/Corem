@@ -8,12 +8,15 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "commonjs",
-    "esModuleInterop" : true,
+    "esModuleInterop": true,
     "target": "ES6",
-    
+
     // For nodejs:
     "lib": ["ES2017"],
     "types": ["node", "jest"],
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     // and npm install -D @types/node
 
     // Other Outputs
@@ -40,6 +43,6 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
+    "skipLibCheck": true
   }
 }

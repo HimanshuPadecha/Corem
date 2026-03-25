@@ -3,6 +3,6 @@ export type Constraint =
   | "NOT NULL"
   | "PRIMARY KEY"
   | "UNIQUE"
-  | `DEFAULT ${number}`
+  | `DEFAULT ${any}`
   | "UNSIGNED"
   | `CHECK ${string}`;

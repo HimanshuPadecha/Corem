@@ -1,4 +1,4 @@
-import { Column } from "../types/column";
+import { Column } from "@/types/column";
 
 type Varchar = Column & {
   notNull: () => Varchar;
