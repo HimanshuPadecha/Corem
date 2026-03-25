@@ -1,17 +1,16 @@
+import { CommonConstraints, ConstraintMethods } from "@/core/common-constrains";
 import { Column } from "@/types/column";
 
-type Varchar = Column & {
-  notNull: () => Varchar;
-};
+export interface Varchar extends Column, ConstraintMethods<Varchar> {
+  default: (chars: string) => Varchar;
+}
 
 export const varchar = (name: string, size: number): Varchar => {
-  return {
+  const base: Column = {
     name,
     type: `VARCHAR(${size})`,
     constraints: [],
-    notNull() {
-      this.constraints.push("NOT NULL");
-      return this;
-    },
   };
+
+  return CommonConstraints(base) as Varchar;
 };
