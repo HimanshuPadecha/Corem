@@ -4,14 +4,14 @@ export type Column = {
   name: string;
   type: string;
   constraints: Constraint[];
-};
-
-export type FinalColumn = Column & {
-  table: string;
   fkey?: {
     far: FinalColumn;
     onDelete?: FkeyDelete;
   };
+};
+
+export type FinalColumn<C extends Column = Column> = C & {
+  table: string;
 };
 
 export type FkeyDelete = "delete" | "cascade";

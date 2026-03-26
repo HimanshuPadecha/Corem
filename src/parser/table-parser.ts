@@ -1,6 +1,7 @@
 import { CoremError } from "@/core/corem-error";
-import { Column } from "@/types/column";
+import { Column, FinalColumn } from "@/types/column";
 import { Table } from "@/types/table";
+import { isForeignKey } from "@/utils/utils";
 
 export const tableParser = <T extends Record<string, Column>>(
   table: Table<T>,
@@ -13,8 +14,11 @@ export const tableParser = <T extends Record<string, Column>>(
 
   let primaryKeyCount = 0;
 
-  for (const [key, value] of Object.entries(columns)) {
-    const { type, constraints, fkey } = value;
+  for (const [key, value] of Object.entries(columns) as [
+    string,
+    FinalColumn,
+  ][]) {
+    const { type, constraints, fkey, name: currentColumnName } = value;
 
     if (constraints.some((constraint) => constraint === "PRIMARY KEY")) {
       primaryKeyCount++;
@@ -27,14 +31,27 @@ export const tableParser = <T extends Record<string, Column>>(
       });
     }
 
-    sqlColumns.push(`${key} ${type} ${constraints.join(" ")}`);
+    sqlColumns.push(`${currentColumnName} ${type} ${constraints.join(" ")}`);
 
     if (fkey) {
       const { far, onDelete } = fkey;
-      
-      
+
+      if (!isForeignKey(far)) {
+        throw new CoremError({
+          code: "NOT PRIMARY KEY",
+          message: "The key is not primary key !!",
+        });
+      }
+
+      let foreignKey = `FOREIGN KEY (${currentColumnName}) REFERENCES ${far.table}(${far.name}) `;
+
+      if (onDelete) {
+        foreignKey += `ON DELETE ${onDelete}`;
+      }
+
+      foreignKeys.push(foreignKey);
     }
   }
 
-  return `CREATE TABLE IF NOT EXISTS ${name} (${sqlColumns.join(",")});`;
+  return `CREATE TABLE IF NOT EXISTS ${name} (${sqlColumns.join(",")} ${foreignKeys.length > 0 ? "," : ""}  ${foreignKeys.join(",")});`;
 };

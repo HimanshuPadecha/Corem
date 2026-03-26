@@ -5,7 +5,7 @@ export type FkeyOnDeleteObj = {
   onDelete: FkeyDelete;
 };
 
-export type ConstraintMethods<T> = FinalColumn & {
+export type ConstraintMethods<T> = {
   primaryKey: () => T;
   notNull: () => T;
   unique: () => T;

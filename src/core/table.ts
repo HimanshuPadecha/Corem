@@ -14,7 +14,7 @@ export const Table = <T extends Record<string, Column>>(
       };
       return [key, finalCol] as const;
     }),
-  ) as { [K in keyof T]: FinalColumn };
+  ) as { [K in keyof T]: FinalColumn<T[K]> };
 
   return {
     name,

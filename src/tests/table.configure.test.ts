@@ -4,22 +4,19 @@ import { varchar } from "@/columns/strings/varchar";
 import { Table } from "@/core/table";
 import { pool } from "@/db";
 import { tableParser } from "@/parser/table-parser";
+import { isForeignKey } from "@/utils/utils";
 
-let users: any;
-
-beforeAll(() => {
-    users = Table("users", {
-      id: int("id").primaryKey().autoIncrement().notNull(),
-      name: varchar("name", 255).notNull(),
-      createdAt: timestamp("created_at").notNull().defaultNow(),
-      updatedAt: timestamp("updated_at")
-        .notNull()
-        .defaultNow({ onUpdate: "CURRENT" }),
-      });
-
-});
+beforeAll(() => {});
 
 test("table schema check ", () => {
+  const users = Table("users", {
+    id: int("id").primaryKey().autoIncrement().notNull(),
+    name: varchar("name", 255).notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .defaultNow({ onUpdate: "CURRENT" }),
+  });
   console.log(users);
 
   expect(users.name).toBe("users");
@@ -28,6 +25,14 @@ test("table schema check ", () => {
 });
 
 test("schema generation test", () => {
+  const users = Table("users", {
+    id: int("id").primaryKey().autoIncrement().notNull(),
+    name: varchar("name", 255).notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .defaultNow({ onUpdate: "CURRENT" }),
+  });
   const schema = tableParser(users);
 
   console.log(
@@ -38,7 +43,15 @@ test("schema generation test", () => {
 });
 
 test("feed user table to database", async () => {
-  
+  const users = Table("users", {
+    id: int("id").primaryKey().autoIncrement().notNull(),
+    name: varchar("name", 255).notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .defaultNow({ onUpdate: "CURRENT" }),
+  });
+
   try {
     const schema = tableParser(users);
     const [rows] = await pool.query("SHOW TABLES");
@@ -55,7 +68,44 @@ test("feed user table to database", async () => {
   }
 });
 
+test("check the fkey check query", async () => {
+  const users = Table("users", {
+    id: int("id").primaryKey().autoIncrement().notNull(),
+    name: varchar("name", 255).notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .defaultNow({ onUpdate: "CURRENT" }),
+  });
 
-test("check the fkey check query", () => {
-    
-})
+  const number = await isForeignKey(users.columns.id);
+
+  console.log({ number });
+
+  expect(number).toBe(1);
+});
+
+test("check foreign key schema", async () => {
+  const users = Table("users", {
+    id: int("id").primaryKey().autoIncrement().notNull(),
+    name: varchar("name", 255).notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at")
+      .notNull()
+      .defaultNow({ onUpdate: "CURRENT" }),
+  });
+
+  const posts = Table("posts", {
+    userId: int("user_id").references(() => users.columns.id, {
+      onDelete: "cascade",
+    }),
+  });
+
+  try {
+    const schema = tableParser(posts);
+
+    console.log(schema);
+  } catch (error) {
+    console.log(error);
+  }
+});

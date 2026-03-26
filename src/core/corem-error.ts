@@ -1,4 +1,4 @@
-type codes = "INVALID SCHEMA";
+type codes = "INVALID SCHEMA" | "NOT PRIMARY KEY";
 
 export class CoremError extends Error {
   code: codes;

@@ -1,9 +1,14 @@
 import { pool } from "@/db";
 import { FinalColumn } from "@/types/column";
+import { RowDataPacket } from "mysql2";
 
 type FkeyCheck = {
   table: string;
   column: string;
+};
+
+type PrimaryKeyCountRow = RowDataPacket & {
+  is_primary: number;
 };
 
 const fkeyCheckQuery = ({ table, column }: FkeyCheck) => {
@@ -18,7 +23,8 @@ const fkeyCheckQuery = ({ table, column }: FkeyCheck) => {
 export const isForeignKey = async (column: FinalColumn) => {
   const query = fkeyCheckQuery({ table: column.table, column: column.name });
 
-  const response = await pool.query(query);
+  const [rows] = await pool.query<PrimaryKeyCountRow[]>(query);
+  const response = rows[0];
 
-  console.log(response);
+  return response?.is_primary ?? 0;
 };
