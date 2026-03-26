@@ -1,11 +1,17 @@
-import { Column } from "@/types/column";
+import { Column, FinalColumn, FkeyDelete } from "@/types/column";
 
-export type ConstraintMethods<T> = {
+
+export type FkeyOnDeleteObj = {
+  onDelete: FkeyDelete;
+};
+
+export type ConstraintMethods<T> = FinalColumn & {
   primaryKey: () => T;
   notNull: () => T;
   unique: () => T;
   default: (value: any) => T;
   check: (condition: string) => T;
+  references: (fn: () => FinalColumn, options?: FkeyOnDeleteObj) => T;
 };
 
 export const CommonConstraints = <T extends Column>(
@@ -15,6 +21,14 @@ export const CommonConstraints = <T extends Column>(
 
   result.primaryKey = () => {
     result.constraints.push("PRIMARY KEY");
+    return result;
+  };
+
+  result.references = (cb, onDelete) => {
+    result.fkey = {
+      far: cb(),
+      ...(onDelete ? { onDelete: onDelete.onDelete } : {}),
+    };
     return result;
   };
 

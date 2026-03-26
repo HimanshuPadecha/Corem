@@ -1,19 +1,25 @@
-import { int } from "../columns/int";
-import { varchar } from "../columns/varchar";
-import { Table } from "../core/table";
-import { pool } from "../db";
-import { tableParser } from "../parser/table-parser";
+import { timestamp } from "@/columns/date-time/timestamp";
+import { int } from "@/columns/numerics/int";
+import { varchar } from "@/columns/strings/varchar";
+import { Table } from "@/core/table";
+import { pool } from "@/db";
+import { tableParser } from "@/parser/table-parser";
 
 let users: any;
 
 beforeAll(() => {
-  users = Table("users", {
-    id: int("id").primaryKey().autoIncrement().notNull(),
-    name: varchar("name", 255).notNull(),
-  });
+    users = Table("users", {
+      id: int("id").primaryKey().autoIncrement().notNull(),
+      name: varchar("name", 255).notNull(),
+      createdAt: timestamp("created_at").notNull().defaultNow(),
+      updatedAt: timestamp("updated_at")
+        .notNull()
+        .defaultNow({ onUpdate: "CURRENT" }),
+      });
+
 });
 
-test("table function check", () => {
+test("table schema check ", () => {
   console.log(users);
 
   expect(users.name).toBe("users");
@@ -32,9 +38,9 @@ test("schema generation test", () => {
 });
 
 test("feed user table to database", async () => {
-  const schema = tableParser(users);
-
+  
   try {
+    const schema = tableParser(users);
     const [rows] = await pool.query("SHOW TABLES");
     console.log(rows);
 
@@ -48,3 +54,8 @@ test("feed user table to database", async () => {
     console.log(error);
   }
 });
+
+
+test("check the fkey check query", () => {
+    
+})

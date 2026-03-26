@@ -1,6 +1,6 @@
-import { Column } from "./column";
+import { Column, FinalColumn } from "./column";
 
 export type Table<T extends Record<string, Column>> = {
   name: string;
-  columns: T;
+  columns: { [K in keyof T]: FinalColumn };
 };

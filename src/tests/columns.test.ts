@@ -1,5 +1,5 @@
-import { int } from "../columns/int";
-import { varchar } from "../columns/varchar";
+import { int } from "@/columns/numerics/int";
+import { varchar } from "../columns/strings/varchar";
 
 test("int test", () => {
   const id = int("id").primaryKey().autoIncrement().notNull();
