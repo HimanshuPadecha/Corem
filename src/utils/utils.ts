@@ -1,6 +1,10 @@
-import { pool } from "@/db";
+import { CoremError } from "@/core/corem-error";
+import { getPool } from "@/db";
 import { FinalColumn } from "@/types/column";
+import { CoremConfig } from "@/types/corem-config";
+import fs from "fs";
 import { RowDataPacket } from "mysql2";
+import path from "path";
 
 type FkeyCheck = {
   table: string;
@@ -21,6 +25,7 @@ const fkeyCheckQuery = ({ table, column }: FkeyCheck) => {
 };
 
 export const isForeignKey = async (column: FinalColumn) => {
+  const pool = await getPool();
   const query = fkeyCheckQuery({ table: column.table, column: column.name });
 
   const [rows] = await pool.query<PrimaryKeyCountRow[]>(query);
@@ -29,9 +34,8 @@ export const isForeignKey = async (column: FinalColumn) => {
   return response?.is_primary ?? 0;
 };
 
-
 export class Console {
-  static log(query : any){
+  static log(query: any) {
     console.log(
       "-----------------------------------------------------------------------------------\n\n" +
         query +
@@ -39,3 +43,50 @@ export class Console {
     );
   }
 }
+
+export const getConfig = async (): Promise<CoremConfig> => {
+  const root = process.cwd();
+
+  if (!fs.existsSync(path.join(root, "corem.config.ts"))) {
+    throw new CoremError({
+      code: "NOT_FOUND",
+      message: "Config not found",
+    });
+  }
+
+  const coremCongig = (await import(path.join(root, "corem.config.ts")))
+    .default as CoremConfig;
+
+  validateConfig(coremCongig);
+
+  return coremCongig;
+};
+
+const validateConfig = (coremConfig: CoremConfig) => {
+  const { credentials, schema } = coremConfig;
+
+  const root = process.cwd();
+
+  if (!schema || !credentials) {
+    throw new CoremError({
+      code: "NOT_FOUND",
+      message: "Schema or credentials not found !!",
+    });
+  }
+
+  if (!fs.existsSync(path.join(root, schema))) {
+    throw new CoremError({
+      code: "NOT_FOUND",
+      message: "Schema file not found ",
+    });
+  }
+
+  const { db_name, host, password, user } = credentials;
+
+  if (!db_name || !host || !password || !user) {
+    throw new CoremError({
+      code: "NOT_FOUND",
+      message: "Credentials not found",
+    });
+  }
+};

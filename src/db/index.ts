@@ -1,20 +1,32 @@
-import mysql from "mysql2/promise"
-import dotenv from "dotenv"
+import mysql, { Pool } from "mysql2/promise";
+import dotenv from "dotenv";
+import { getConfig } from "@/utils/utils";
 
-dotenv.config()
+dotenv.config();
 
-export const pool = mysql.createPool({
-    host : process.env.DB_HOST!,
-    user : process.env.DB_USER!,
-    password : process.env.DB_PASSWORD!,
-    database : process.env.DB_NAME!,
-    port : 3306,
+let pool: Pool | undefined;
+
+export const getPool = async () => {
+  if (pool) return pool;
+
+  const coremConfig = await getConfig();
+  const { credentials } = coremConfig;
+
+  pool = mysql.createPool({
+    host: credentials.host,
+    user: credentials.user,
+    password: credentials.password,
+    database: credentials.db_name,
+    port: 3306,
 
     ssl: {
-        rejectUnauthorized: false
-      },
-    
-      waitForConnections: true,
-      connectionLimit: 10,
-      connectTimeout : 10000
-})
+      rejectUnauthorized: false,
+    },
+
+    waitForConnections: true,
+    connectionLimit: 10,
+    connectTimeout: 10000,
+  });
+
+  return pool;
+};

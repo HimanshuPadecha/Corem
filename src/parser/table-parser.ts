@@ -26,7 +26,7 @@ export const tableParser = <T extends Record<string, Column>>(
 
     if (primaryKeyCount > 1) {
       throw new CoremError({
-        code: "INVALID SCHEMA",
+        code: "INVALID_SCHEMA",
         message: "Two primary keys cannot be in a table",
       });
     }
@@ -38,7 +38,7 @@ export const tableParser = <T extends Record<string, Column>>(
 
       if (!isForeignKey(far)) {
         throw new CoremError({
-          code: "NOT PRIMARY KEY",
+          code: "NOT_PRIMARY_KEY",
           message: "The key is not primary key !!",
         });
       }
@@ -55,3 +55,4 @@ export const tableParser = <T extends Record<string, Column>>(
 
   return `CREATE TABLE IF NOT EXISTS ${name} (${sqlColumns.join(",")} ${foreignKeys.length > 0 ? "," : ""}  ${foreignKeys.join(",")});`;
 };
+

@@ -1,6 +1,4 @@
-import { int } from "@/columns/numerics/int";
-import { varchar } from "../columns/strings/varchar";
-import { sqlEnum } from "@/columns/enum/enum";
+import { int, varchar, sqlEnum } from "@/columns";
 import { Console } from "@/utils/utils";
 import { Table } from "@/core/table";
 import { tableParser } from "@/parser/table-parser";
