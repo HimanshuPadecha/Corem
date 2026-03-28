@@ -28,3 +28,14 @@ export const isForeignKey = async (column: FinalColumn) => {
 
   return response?.is_primary ?? 0;
 };
+
+
+export class Console {
+  static log(query : any){
+    console.log(
+      "-----------------------------------------------------------------------------------\n\n" +
+        query +
+        "\n\n-------------------------------------------------------------------------------------",
+    );
+  }
+}

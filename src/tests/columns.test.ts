@@ -1,5 +1,9 @@
 import { int } from "@/columns/numerics/int";
 import { varchar } from "../columns/strings/varchar";
+import { sqlEnum } from "@/columns/enum/enum";
+import { Console } from "@/utils/utils";
+import { Table } from "@/core/table";
+import { tableParser } from "@/parser/table-parser";
 
 test("int test", () => {
   const id = int("id").primaryKey().autoIncrement().notNull();
@@ -21,4 +25,17 @@ test("varchar test", () => {
   expect(name.name).toBe("name");
 
   expect(name.constraints).toEqual(["NOT NULL"]);
+});
+
+test("check enum", () => {
+  const users = Table("users", {
+    id: int("id").notNull().primaryKey().autoIncrement(),
+    status: sqlEnum("status", ["Active", "Inactive"] as const)
+      .notNull()
+      .default("Active"),
+  });
+
+  const schema = tableParser(users);
+
+  Console.log(schema);
 });

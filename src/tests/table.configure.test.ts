@@ -4,7 +4,7 @@ import { varchar } from "@/columns/strings/varchar";
 import { Table } from "@/core/table";
 import { pool } from "@/db";
 import { tableParser } from "@/parser/table-parser";
-import { isForeignKey } from "@/utils/utils";
+import { Console, isForeignKey } from "@/utils/utils";
 
 beforeAll(() => {});
 
@@ -35,11 +35,7 @@ test("schema generation test", () => {
   });
   const schema = tableParser(users);
 
-  console.log(
-    "-----------------------------------------------------------------------------------\n\n" +
-      schema +
-      "\n\n-------------------------------------------------------------------------------------",
-  );
+  Console.log(schema);
 });
 
 test("feed user table to database", async () => {
@@ -85,7 +81,7 @@ test("check the fkey check query", async () => {
   expect(number).toBe(1);
 });
 
-test("check foreign key schema", async () => {
+test("feed tables with foreign keys to database", async () => {
   const users = Table("users", {
     id: int("id").primaryKey().autoIncrement().notNull(),
     name: varchar("name", 255).notNull(),
@@ -104,7 +100,16 @@ test("check foreign key schema", async () => {
   try {
     const schema = tableParser(posts);
 
-    console.log(schema);
+    Console.log(schema);
+
+    // remove old tables if exists already
+
+    // await pool.query("DROP TABLE IF EXISTS users");
+    await pool.query("DROP TABLE IF EXISTS posts");
+
+    const [result] = await pool.query(schema);
+
+    Console.log(result);
   } catch (error) {
     console.log(error);
   }
