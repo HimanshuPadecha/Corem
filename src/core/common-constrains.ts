@@ -43,7 +43,7 @@ export const CommonConstraints = <T extends Column>(
   };
 
   result.default = (value) => {
-    result.constraints.push(`DEFAULT ${value}`);
+    result.constraints.push(`DEFAULT '${value}'`);
     return result;
   };
 

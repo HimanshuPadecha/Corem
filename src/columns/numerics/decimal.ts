@@ -19,6 +19,11 @@ export const decimal = (
 
   const result = CommonConstraints(base) as unknown as Decimal;
 
+  result.default = (num) => {
+    result.constraints.push(`DEFAULT ${num}`);
+    return result;
+  };
+
   result.unsigned = () => {
     result.constraints.push("UNSIGNED");
     return result;

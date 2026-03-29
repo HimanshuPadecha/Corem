@@ -11,6 +11,11 @@ export const bigInt = (name: string): BigInt => {
 
   const result = CommonConstraints(base) as unknown as BigInt;
 
+  result.default = (num) => {
+    result.constraints.push(`DEFAULT ${num}`);
+    return result;
+  };
+
   result.autoIncrement = () => {
     result.constraints.push("AUTO_INCREMENT");
     return result;

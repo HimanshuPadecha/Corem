@@ -1,0 +1,52 @@
+import { CoremError } from "@/core/corem-error";
+import { FinalColumn } from "@/types/column";
+import { isForeignKey, isTableExists, logger } from "@/utils/utils";
+
+export const alterAddColumnParser = async (columns: FinalColumn[]) : Promise<string> => {
+  if (columns.length === 0) {
+    logger.info("No New Columns");
+    return "";
+  }
+
+  const sqlColumns: string[] = [];
+  const foreignKeys: string[] = [];
+
+  const { table } = columns[0]!;
+
+  let sql = `ALTER TABLE ${table} `;
+
+  for (const column of columns) {
+    const { constraints, name: currentCol, type, fkey } = column;
+    sqlColumns.push(
+      `ADD COLUMN ${currentCol} ${type} ${constraints.join(" ")}`,
+    );
+
+    if (fkey) {
+      const { far, onDelete } = fkey;
+
+      if (!(await isTableExists(far.table))) {
+        throw new CoremError({
+          code: "NOT_FOUND",
+          message: "Table not found !!",
+        });
+      }
+
+      if (!(await isForeignKey(far))) {
+        throw new CoremError({
+          code: "NOT_PRIMARY_KEY",
+          message: "The key is not primary key !!",
+        });
+      }
+
+      let sql = `ADD CONSTRAINT fk_${far.table} FOREIGN KEY (${currentCol}) REFERENCES ${far.table}(${far.name}) `;
+
+      if (onDelete) {
+        sql += `ON DELETE ${onDelete}`;
+      }
+
+      foreignKeys.push(sql);
+    }
+  }
+
+  return `${sql}${sqlColumns.join(",")} ${foreignKeys.length > 0 ? "," : ""} ${foreignKeys.join(",")};`;
+};

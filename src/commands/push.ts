@@ -2,9 +2,11 @@ import { getPool } from "@/db";
 import {
   checkAndAddTableInDb,
   checkAndRemoveTableInDb,
-} from "@/utils/table-updation";
+} from "@/core/table-updation";
 import { getConfig, getDbTables, getUserSchema, logger } from "@/utils/utils";
 import dotenv from "dotenv";
+import { tableColumnsAdditionCheck } from "@/core/column-updation";
+import { CoremError } from "@/core/corem-error";
 
 dotenv.config({ quiet: true });
 
@@ -26,9 +28,15 @@ export const push = async () => {
 
     await checkAndRemoveTableInDb(dbTables, configSchema);
 
+    for (const table of configSchema) {
+      await tableColumnsAdditionCheck(table);
+    }
+
     logger.success("Changes Applied !");
   } catch (error) {
+    logger.error("push stopped");
     console.log(error);
+    process.exit(1);
   } finally {
     await pool.end();
   }

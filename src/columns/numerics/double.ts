@@ -11,6 +11,12 @@ export const double = (name: string): Double => {
 
   const result = CommonConstraints(base) as unknown as Double;
 
+
+  result.default = (num) => {
+    result.constraints.push(`DEFAULT ${num}`);
+    return result
+  };
+
   result.unsigned = () => {
     result.constraints.push("UNSIGNED");
     return result;

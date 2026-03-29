@@ -138,7 +138,7 @@ export const getTablesWithoutForeignKeys = (
   tables: Table<Record<string, Column>>[],
 ) => {
   return tables.filter((table) => {
-    if (!table?.columns) return false; // 🔥 guard
+    if (!table?.columns) return false;
 
     return Object.values(table.columns).every((col) => !col?.fkey);
   });
@@ -148,7 +148,7 @@ export const getTablesWithForeignKeys = (
   tables: Table<Record<string, Column>>[],
 ) => {
   return tables.filter((table) => {
-    if (!table?.columns) return false; // 🔥 guard
+    if (!table?.columns) return false;
 
     return Object.values(table.columns).some((col) => col?.fkey);
   });

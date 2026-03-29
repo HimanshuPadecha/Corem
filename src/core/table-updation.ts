@@ -7,7 +7,7 @@ import {
   getTablesWithoutForeignKeys,
   logger,
   tablePartitionsToDeleteThem,
-} from "./utils";
+} from "@/utils/utils";
 
 export const checkAndAddTableInDb = async (
   dbTables: string[],

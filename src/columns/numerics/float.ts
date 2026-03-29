@@ -15,6 +15,12 @@ export const float = (name: string): Float => {
 
   const result = CommonConstraints(base) as unknown as Float;
 
+
+  result.default = (num) => {
+    result.constraints.push(`DEFAULT ${num}`);
+    return result
+  };
+
   result.unsigned = () => {
     result.constraints.push("UNSIGNED");
     return result;
