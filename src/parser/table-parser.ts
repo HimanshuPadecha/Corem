@@ -1,11 +1,11 @@
 import { CoremError } from "@/core/corem-error";
 import { Column, FinalColumn } from "@/types/column";
 import { Table } from "@/types/table";
-import { isForeignKey } from "@/utils/utils";
+import { isForeignKey, isTableExists } from "@/utils/utils";
 
-export const tableParser = <T extends Record<string, Column>>(
+export const tableParser = async <T extends Record<string, Column>>(
   table: Table<T>,
-): string => {
+): Promise<string> => {
   const { name, columns } = table;
 
   const sqlColumns: string[] = [];
@@ -14,10 +14,7 @@ export const tableParser = <T extends Record<string, Column>>(
 
   let primaryKeyCount = 0;
 
-  for (const [key, value] of Object.entries(columns) as [
-    string,
-    FinalColumn,
-  ][]) {
+  for (const [_, value] of Object.entries(columns) as [string, FinalColumn][]) {
     const { type, constraints, fkey, name: currentColumnName } = value;
 
     if (constraints.some((constraint) => constraint === "PRIMARY KEY")) {
@@ -36,7 +33,14 @@ export const tableParser = <T extends Record<string, Column>>(
     if (fkey) {
       const { far, onDelete } = fkey;
 
-      if (!isForeignKey(far)) {
+      if (!(await isTableExists(far.table))) {
+        throw new CoremError({
+          code: "NOT_FOUND",
+          message: "Table not found !!",
+        });
+      }
+
+      if (!(await isForeignKey(far))) {
         throw new CoremError({
           code: "NOT_PRIMARY_KEY",
           message: "The key is not primary key !!",
@@ -55,4 +59,3 @@ export const tableParser = <T extends Record<string, Column>>(
 
   return `CREATE TABLE IF NOT EXISTS ${name} (${sqlColumns.join(",")} ${foreignKeys.length > 0 ? "," : ""}  ${foreignKeys.join(",")});`;
 };
-

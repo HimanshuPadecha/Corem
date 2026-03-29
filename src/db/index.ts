@@ -4,7 +4,7 @@ import { getConfig } from "@/utils/utils";
 
 dotenv.config();
 
-let pool: Pool | undefined;
+let pool: Pool | null;
 
 export const getPool = async () => {
   if (pool) return pool;
@@ -29,4 +29,11 @@ export const getPool = async () => {
   });
 
   return pool;
+};
+
+export const closePool = async () => {
+  if (!pool) return;
+
+  await pool.end();
+  pool = null;
 };

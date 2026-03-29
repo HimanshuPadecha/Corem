@@ -36,29 +36,27 @@ test("Checking if we can load the confing file", async () => {
 });
 
 test("get the schema from the config", async () => {
-    const coremConfig = await getConfig();
+  const coremConfig = await getConfig();
 
-    const { schema: schemaPath } = coremConfig;
+  const { schema: schemaPath } = coremConfig;
 
-    const fullPath = path.resolve(process.cwd(),schemaPath)
+  const fullPath = path.resolve(process.cwd(), schemaPath);
 
-    const schema = await import(fullPath);
+  const schema = await import(fullPath);
 
-    const pool = await getPool();
+  const pool = await getPool();
 
-    for (const [_, value] of Object.entries(schema) as unknown as [
-      string,
-      Table<Record<string, Column>>,
-    ][]) {
-      const tableSchema = tableParser(value);
+  for (const [_, value] of Object.entries(schema) as unknown as [
+    string,
+    Table<Record<string, Column>>,
+  ][]) {
+    const tableSchema = await tableParser(value);
 
-      await pool.query(tableSchema);
-    }
-
+    await pool.query(tableSchema);
+  }
 });
 
-
 afterAll(async () => {
-  const pool = await getPool()
-  pool.end()
-})
+  const pool = await getPool();
+  pool.end();
+});

@@ -2,7 +2,7 @@ import { getPool } from "@/db";
 import { tableParser } from "@/parser/table-parser";
 import { Column } from "@/types/column";
 import { Table } from "@/types/table";
-import { getConfig, logger } from "@/utils/utils";
+import { getConfig, getUserSchema, logger } from "@/utils/utils";
 import path from "path";
 import dotenv from "dotenv";
 
@@ -18,23 +18,18 @@ export const push = async () => {
 
     const coremConfig = await getConfig();
 
-    const { schema: schemaPath } = coremConfig;
+    const tables = await getUserSchema(coremConfig);
 
-    const root = process.cwd();
+    for (const table of tables) {
+      logger.info(`Shipping table schema : ${table.name}`);
 
-    const schema = await import(path.resolve(root, schemaPath));
+      const schema = await tableParser(table);
 
-    for (const [key, value] of Object.entries(schema) as unknown as [
-      string,
-      Table<Record<string, Column>>,
-    ][]) {
-      logger.info(`Creating Table : ${key}`);
+      await pool.query(schema);
 
-      const tableSchema = tableParser(value);
-
-      await pool.query(tableSchema);
-      logger.success(`Table created : ${key}`);
+      logger.success(`Table populated : ${table.name}`);
     }
+
     logger.success("All tables pushed successfully !");
   } catch (error) {
     console.log(error);

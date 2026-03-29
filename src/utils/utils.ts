@@ -1,7 +1,8 @@
 import { CoremError } from "@/core/corem-error";
 import { getPool } from "@/db";
-import { FinalColumn } from "@/types/column";
+import { Column, FinalColumn } from "@/types/column";
 import { CoremConfig } from "@/types/corem-config";
+import { Table } from "@/types/table";
 import fs from "fs";
 import { RowDataPacket } from "mysql2";
 import path from "path";
@@ -32,6 +33,25 @@ export const isForeignKey = async (column: FinalColumn) => {
   const response = rows[0];
 
   return response?.is_primary ?? 0;
+};
+
+export const getDbTables = async () => {
+  const pool = await getPool();
+  let dbTables: string[] = [];
+
+  const [rows] = await pool.query<RowDataPacket[]>("SHOW TABLES;");
+
+  rows.forEach((row) => dbTables.push(Object.values(row)[0] as string));
+
+  return dbTables;
+};
+
+export const isTableExists = async (name: string) => {
+  const tables = await getDbTables();
+
+  const tableSet: Set<string> = new Set(tables);
+
+  return tableSet.has(name);
 };
 
 export class Console {
@@ -91,6 +111,44 @@ const validateConfig = (coremConfig: CoremConfig) => {
   }
 };
 
+export const getUserSchema = async (coremConfig: CoremConfig) => {
+  const { schema: schemaPath } = coremConfig;
+
+  const root = process.cwd();
+
+  const schema = await import(path.resolve(root, schemaPath));
+
+  const tables: Table<Record<string, Column>>[] = [];
+
+  for (const [_, table] of Object.entries(schema) as unknown as [
+    string,
+    Table<Record<string, Column>>,
+  ][]) {
+    tables.push(table);
+  }
+
+  return tables;
+};
+
+export const getTablesWithoutForeignKeys = (
+  tables: Table<Record<string, Column>>[],
+): Table<Record<string, Column>>[] => {
+  return [
+    ...tables.filter((table) =>
+      Object.values(table.columns).every((col) => !col.fkey),
+    ),
+  ];
+};
+
+export const getTablesWithForeignKeys = (
+  tables: Table<Record<string, Column>>[],
+): Table<Record<string, Column>>[] => {
+  return [
+    ...tables.filter((table) =>
+      Object.values(table.columns).some((col) => col.fkey),
+    ),
+  ];
+};
 
 export const logger = {
   info: (msg: string) => console.log(`ℹ️  ${msg}`),

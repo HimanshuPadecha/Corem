@@ -1,7 +1,7 @@
 import { getPool } from "@/db";
 import { tableParser } from "@/parser/table-parser";
 import { Console, isForeignKey } from "@/utils/utils";
-import { posts, users } from "./schema";
+import { posts, users } from "../db/schema";
 import type { Pool } from "mysql2/promise";
 
 let pool: Pool;
@@ -18,15 +18,15 @@ test("table schema check ", () => {
   expect(users.columns.id.name).toBe("id");
 });
 
-test("schema generation test", () => {
-  const schema = tableParser(users);
+test("schema generation test",async () => {
+  const schema = await tableParser(users);
 
   Console.log(schema);
 });
 
 test("feed user table to database", async () => {
   try {
-    const schema = tableParser(users);
+    const schema = await tableParser(users);
     const [rows] = await pool.query("SHOW TABLES");
     console.log(rows);
 
@@ -51,7 +51,7 @@ test("check the fkey check query", async () => {
 
 test("feed tables with foreign keys to database", async () => {
   try {
-    const schema = tableParser(posts);
+    const schema = await tableParser(posts);
     Console.log(schema);
 
     const [result] = await pool.query(schema);

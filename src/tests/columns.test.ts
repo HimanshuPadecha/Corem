@@ -25,7 +25,7 @@ test("varchar test", () => {
   expect(name.constraints).toEqual(["NOT NULL"]);
 });
 
-test("check enum", () => {
+test("check enum", async () => {
   const users = Table("users", {
     id: int("id").notNull().primaryKey().autoIncrement(),
     status: sqlEnum("status", ["Active", "Inactive"] as const)
@@ -33,7 +33,7 @@ test("check enum", () => {
       .default("Active"),
   });
 
-  const schema = tableParser(users);
+  const schema = await tableParser(users);
 
   Console.log(schema);
 });
