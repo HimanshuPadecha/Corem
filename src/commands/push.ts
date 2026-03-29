@@ -1,9 +1,9 @@
 import { getPool } from "@/db";
-import { tableParser } from "@/parser/table-parser";
-import { Column } from "@/types/column";
-import { Table } from "@/types/table";
-import { getConfig, getUserSchema, logger } from "@/utils/utils";
-import path from "path";
+import {
+  checkAndAddTableInDb,
+  checkAndRemoveTableInDb,
+} from "@/utils/table-updation";
+import { getConfig, getDbTables, getUserSchema, logger } from "@/utils/utils";
 import dotenv from "dotenv";
 
 dotenv.config({ quiet: true });
@@ -16,21 +16,17 @@ export const push = async () => {
     logger.info("Loading config...");
     logger.info("Connecting to database...");
 
+    const dbTables: string[] = await getDbTables();
+
     const coremConfig = await getConfig();
 
-    const tables = await getUserSchema(coremConfig);
+    const configSchema = await getUserSchema(coremConfig);
 
-    for (const table of tables) {
-      logger.info(`Shipping table schema : ${table.name}`);
+    await checkAndAddTableInDb(dbTables, configSchema);
 
-      const schema = await tableParser(table);
+    await checkAndRemoveTableInDb(dbTables, configSchema);
 
-      await pool.query(schema);
-
-      logger.success(`Table populated : ${table.name}`);
-    }
-
-    logger.success("All tables pushed successfully !");
+    logger.success("Changes Applied !");
   } catch (error) {
     console.log(error);
   } finally {

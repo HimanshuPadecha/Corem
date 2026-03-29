@@ -6,6 +6,7 @@ import {
   getTablesWithForeignKeys,
   getTablesWithoutForeignKeys,
   logger,
+  tablePartitionsToDeleteThem,
 } from "./utils";
 
 export const checkAndAddTableInDb = async (
@@ -42,9 +43,11 @@ export const checkAndAddTableInDb = async (
       schemaForTablesWithoutForeignKeys.map((schema) => pool.query(schema)),
     );
 
-    logger.success(
-      `Tables added to database : ${tablesWithoutForeignKeys.map((table) => table.name).join(" , ")}`,
-    );
+    if (tablesWithoutForeignKeys.length > 0) {
+      logger.success(
+        `Tables added to database : ${tablesWithoutForeignKeys.map((table) => table.name).join(" , ")}`,
+      );
+    }
 
     const tablesWithForeignKeys = getTablesWithForeignKeys(newTables);
 
@@ -56,9 +59,55 @@ export const checkAndAddTableInDb = async (
       schemaForTablesWithForeignKeys.map((schema) => pool.query(schema)),
     );
 
-    logger.success(
-      `New Tables added to database : ${tablesWithForeignKeys.map((table) => table.name).join(" , ")} `,
+    if (tablesWithForeignKeys.length > 0) {
+      logger.success(
+        `New Tables added to database : ${tablesWithForeignKeys.map((table) => table.name).join(" , ")} `,
+      );
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const checkAndRemoveTableInDb = async (
+  dbTables: string[],
+  configSchema: Table<Record<string, Column>>[],
+) => {
+  try {
+    const pool = await getPool();
+    const configSchemaSet: Set<string> = new Set(
+      configSchema.map((table) => table.name),
     );
+
+    const tablesToRemove = dbTables.filter(
+      (table) => !configSchemaSet.has(table),
+    );
+
+    if (tablesToRemove.length === 0) {
+      logger.success("No table to remove !!");
+      return;
+    }
+
+    const { withForeignKeys, withoutForeignKeys } =
+      await tablePartitionsToDeleteThem(tablesToRemove);
+
+    if (withForeignKeys.length > 0) {
+      await Promise.all(
+        withForeignKeys.map((table) =>
+          pool.query(`DROP TABLE IF EXISTS ${table}`),
+        ),
+      );
+      logger.success(`Tables deleted : ${withForeignKeys.join(" , ")}`);
+    }
+
+    if (withoutForeignKeys.length > 0) {
+      await Promise.all(
+        withoutForeignKeys.map((table) =>
+          pool.query(`DROP TABLE IF EXISTS ${table}`),
+        ),
+      );
+      logger.success(`Tables deleted : ${withoutForeignKeys.join(" , ")}`);
+    }
   } catch (error) {
     console.log(error);
   }

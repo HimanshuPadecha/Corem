@@ -16,6 +16,10 @@ type PrimaryKeyCountRow = RowDataPacket & {
   is_primary: number;
 };
 
+type HaveFkeyRow = RowDataPacket & {
+  have_fkey: number;
+};
+
 const fkeyCheckQuery = ({ table, column }: FkeyCheck) => {
   return `SELECT COUNT(*) AS is_primary
         FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
@@ -132,27 +136,63 @@ export const getUserSchema = async (coremConfig: CoremConfig) => {
 
 export const getTablesWithoutForeignKeys = (
   tables: Table<Record<string, Column>>[],
-): Table<Record<string, Column>>[] => {
-  return [
-    ...tables.filter((table) =>
-      Object.values(table.columns).every((col) => !col.fkey),
-    ),
-  ];
+) => {
+  return tables.filter((table) => {
+    if (!table?.columns) return false; // 🔥 guard
+
+    return Object.values(table.columns).every((col) => !col?.fkey);
+  });
 };
 
 export const getTablesWithForeignKeys = (
   tables: Table<Record<string, Column>>[],
-): Table<Record<string, Column>>[] => {
-  return [
-    ...tables.filter((table) =>
-      Object.values(table.columns).some((col) => col.fkey),
-    ),
-  ];
+) => {
+  return tables.filter((table) => {
+    if (!table?.columns) return false; // 🔥 guard
+
+    return Object.values(table.columns).some((col) => col?.fkey);
+  });
+};
+
+type Partition = { withForeignKeys: string[]; withoutForeignKeys: string[] };
+
+// This function devide tables in to tables with foreign keys and without foreign keys
+// so that we can delete tables with foreign keys first
+export const tablePartitionsToDeleteThem = async (
+  tables: string[],
+): Promise<Partition> => {
+  const coremConfig = await getConfig();
+
+  const buildQuery = (name: string) => `SELECT 1 AS "have_fkey"
+      FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+      WHERE TABLE_SCHEMA = '${coremConfig.credentials.db_name}'
+      AND TABLE_NAME = '${name}'
+      AND REFERENCED_TABLE_NAME IS NOT NULL
+      LIMIT 1;`;
+
+  const pool = await getPool();
+
+  const result: Partition = { withForeignKeys: [], withoutForeignKeys: [] };
+
+  for (const table of tables) {
+    const query = buildQuery(table);
+
+    const [rows] = await pool.query<HaveFkeyRow[]>(query);
+
+    const exists = rows[0]?.have_fkey === 1;
+    if (exists) {
+      result.withForeignKeys.push(table);
+    } else {
+      result.withoutForeignKeys.push(table);
+    }
+  }
+
+  return result;
 };
 
 export const logger = {
-  info: (msg: string) => console.log(`ℹ️  ${msg}`),
-  success: (msg: string) => console.log(`✅ ${msg}`),
-  error: (msg: string) => console.error(`❌ ${msg}`),
-  step: (msg: string) => console.log(`🚀 ${msg}`),
+  info: (msg: string) => console.log(`ℹ️  ${msg} \n`),
+  success: (msg: string) => console.log(`✅ ${msg} \n`),
+  error: (msg: string) => console.error(`❌ ${msg}\n`),
+  step: (msg: string) => console.log(`🚀 ${msg}\n`),
 };
