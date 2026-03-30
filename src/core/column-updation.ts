@@ -40,7 +40,7 @@ export const tableColumnsAdditionCheck = async (
     );
 
     if (newColumns.length === 0) {
-      logger.info("No new Columns to add !");
+      logger.info(`No new Columns to add for ${name} !`);
       return;
     }
 

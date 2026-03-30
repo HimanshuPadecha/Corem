@@ -1,7 +1,7 @@
 import { getPool } from "@/db";
 import {
-  checkAndAddTableInDb,
-  checkAndRemoveTableInDb,
+  checkAndAddTablesInDb,
+  checkAndRemoveTablesInDb,
 } from "@/core/table-updation";
 import { getConfig, getDbTables, getUserSchema, logger } from "@/utils/utils";
 import dotenv from "dotenv";
@@ -18,15 +18,31 @@ export const push = async () => {
     logger.info("Loading config...");
     logger.info("Connecting to database...");
 
-    const dbTables: string[] = await getDbTables();
+    let dbTables: string[] = await getDbTables();
 
     const coremConfig = await getConfig();
 
     const configSchema = await getUserSchema(coremConfig);
 
-    await checkAndAddTableInDb(dbTables, configSchema);
+    const deletedTables = await checkAndRemoveTablesInDb(
+      dbTables,
+      configSchema,
+    );
 
-    await checkAndRemoveTableInDb(dbTables, configSchema);
+    if (deletedTables !== undefined) {
+      dbTables = await getDbTables();
+    }
+
+    if (dbTables.length === 0 && configSchema === null) {
+      logger.success("Changes applied !!");
+      return;
+    }
+
+    if (configSchema === null) {
+      return;
+    }
+
+    await checkAndAddTablesInDb(dbTables, configSchema);
 
     for (const table of configSchema) {
       await tableColumnsAdditionCheck(table);

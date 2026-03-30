@@ -9,7 +9,7 @@ import {
   tablePartitionsToDeleteThem,
 } from "@/utils/utils";
 
-export const checkAndAddTableInDb = async (
+export const checkAndAddTablesInDb = async (
   dbTables: string[],
   configSchema: Table<Record<string, Column>>[],
 ) => {
@@ -69,23 +69,28 @@ export const checkAndAddTableInDb = async (
   }
 };
 
-export const checkAndRemoveTableInDb = async (
+export const checkAndRemoveTablesInDb = async (
   dbTables: string[],
-  configSchema: Table<Record<string, Column>>[],
+  configSchema: Table<Record<string, Column>>[] | null,
 ) => {
   try {
     const pool = await getPool();
-    const configSchemaSet: Set<string> = new Set(
-      configSchema.map((table) => table.name),
-    );
 
-    const tablesToRemove = dbTables.filter(
-      (table) => !configSchemaSet.has(table),
-    );
+    let tablesToRemove: string[];
+
+    if (configSchema === null) {
+      tablesToRemove = dbTables;
+    } else {
+      const configSchemaSet: Set<string> = new Set(
+        configSchema.map((table) => table.name),
+      );
+
+      tablesToRemove = dbTables.filter((table) => !configSchemaSet.has(table));
+    }
 
     if (tablesToRemove.length === 0) {
       logger.success("No table to remove !!");
-      return;
+      return [];
     }
 
     const { withForeignKeys, withoutForeignKeys } =
@@ -108,6 +113,8 @@ export const checkAndRemoveTableInDb = async (
       );
       logger.success(`Tables deleted : ${withoutForeignKeys.join(" , ")}`);
     }
+
+    return [...withForeignKeys, ...withoutForeignKeys];
   } catch (error) {
     console.log(error);
   }

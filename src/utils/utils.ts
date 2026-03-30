@@ -122,6 +122,17 @@ export const getUserSchema = async (coremConfig: CoremConfig) => {
 
   const schema = await import(path.resolve(root, schemaPath));
 
+  const values = Object.values(schema);
+
+  const isEmpty = values.every(
+    (val) =>
+      val == null || (typeof val === "object" && Object.keys(val).length === 0),
+  );
+
+  if (isEmpty) {
+    return null;
+  }
+
   const tables: Table<Record<string, Column>>[] = [];
 
   for (const [_, table] of Object.entries(schema) as unknown as [
