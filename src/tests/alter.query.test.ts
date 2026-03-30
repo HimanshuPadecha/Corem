@@ -1,10 +1,13 @@
-import { closePool } from "@/db";
+import { closePool, getPool } from "@/db";
 import {
   checkAndAddTablesInDb,
   checkAndRemoveTablesInDb,
 } from "@/core/table-updation";
 import { getConfig, getDbTables, getUserSchema } from "@/utils/utils";
-import { tableColumnsAdditionCheck } from "@/core/column-updation";
+import {
+  tableColumnsAddition,
+  tableColumnsDeletion,
+} from "@/core/column-updation";
 
 test("check new table add for database", async () => {
   const dbTables: string[] = await getDbTables();
@@ -40,8 +43,41 @@ test("check column add", async () => {
   }
 
   for (const table of configSchema) {
-    await tableColumnsAdditionCheck(table);
+    await tableColumnsAddition(table);
   }
+});
+
+test("check column remove", async () => {
+  const coremConfig = await getConfig();
+  const configSchema = await getUserSchema(coremConfig);
+
+  if (coremConfig === null) {
+    return;
+  }
+
+  for (const table of configSchema!) {
+    await tableColumnsDeletion(table);
+  }
+});
+
+test("is foreign key test", async () => {
+  const pool = await getPool();
+
+  const query = `SELECT
+    TABLE_NAME,
+    COLUMN_NAME,
+    CONSTRAINT_NAME,
+    REFERENCED_TABLE_NAME,
+    REFERENCED_COLUMN_NAME
+FROM information_schema.KEY_COLUMN_USAGE
+WHERE TABLE_NAME = 'posts'
+  AND COLUMN_NAME = 'user_id'
+  AND REFERENCED_TABLE_NAME IS NOT NULL;`;
+
+  const [result] = await pool.query(query);
+
+  console.log(result);
+  
 });
 
 afterAll(async () => {

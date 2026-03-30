@@ -1,12 +1,10 @@
 import { CoremError } from "@/core/corem-error";
 import { FinalColumn } from "@/types/column";
-import { isForeignKey, isTableExists, logger } from "@/utils/utils";
+import { isPrimaryKey, isTableExists  } from "@/utils/utils";
 
-export const alterAddColumnParser = async (columns: FinalColumn[]) : Promise<string> => {
-  if (columns.length === 0) {
-    logger.info("No New Columns");
-    return "";
-  }
+export const alterAddColumnParser = async (
+  columns: FinalColumn[],
+): Promise<string> => {
 
   const sqlColumns: string[] = [];
   const foreignKeys: string[] = [];
@@ -31,7 +29,7 @@ export const alterAddColumnParser = async (columns: FinalColumn[]) : Promise<str
         });
       }
 
-      if (!(await isForeignKey(far))) {
+      if (!(await isPrimaryKey(far))) {
         throw new CoremError({
           code: "NOT_PRIMARY_KEY",
           message: "The key is not primary key !!",
@@ -49,4 +47,14 @@ export const alterAddColumnParser = async (columns: FinalColumn[]) : Promise<str
   }
 
   return `${sql}${sqlColumns.join(",")} ${foreignKeys.length > 0 ? "," : ""} ${foreignKeys.join(",")};`;
+};
+
+export const alterRemoveColumnParser = ({
+  table,
+  columns,
+}: {
+  table: string;
+  columns: string[];
+}) => {
+  return `ALTER TABLE ${table} ${columns.map((column) => `DROP COLUMN ${column}`).join(",")}`;
 };

@@ -3,9 +3,15 @@ import {
   checkAndAddTablesInDb,
   checkAndRemoveTablesInDb,
 } from "@/core/table-updation";
-import { getConfig, getDbTables, getUserSchema, logger } from "@/utils/utils";
+import {
+  findAndSortTablesBasedOnColumnsToAdd,
+  getConfig,
+  getDbTables,
+  getUserSchema,
+  logger,
+} from "@/utils/utils";
 import dotenv from "dotenv";
-import { tableColumnsAdditionCheck } from "@/core/column-updation";
+import { tableColumnsAddition } from "@/core/column-updation";
 import { CoremError } from "@/core/corem-error";
 
 dotenv.config({ quiet: true });
@@ -44,8 +50,13 @@ export const push = async () => {
 
     await checkAndAddTablesInDb(dbTables, configSchema);
 
-    for (const table of configSchema) {
-      await tableColumnsAdditionCheck(table);
+    const sortedTablesWithNewColumns =
+      await findAndSortTablesBasedOnColumnsToAdd(configSchema);
+
+    if (sortedTablesWithNewColumns.length > 0) {
+      for (const table of sortedTablesWithNewColumns) {
+        await tableColumnsAddition(table);
+      }
     }
 
     logger.success("Changes Applied !");

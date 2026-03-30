@@ -5,6 +5,7 @@ export const users = Table("users", {
   id: int("id").primaryKey().autoIncrement().notNull(),
   name: varchar("name", 255).notNull(),
   address : text("address").notNull(),
+  new_home : text("new_home").notNull(),
   home : varchar("home",255).notNull().default("This is default home"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
@@ -18,4 +19,3 @@ export const posts = Table("posts", {
   }),
   id : int("id").primaryKey().autoIncrement().notNull(),
 });
-

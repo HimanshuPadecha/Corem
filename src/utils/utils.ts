@@ -1,3 +1,4 @@
+import { DescTableRow } from "@/core/column-updation";
 import { CoremError } from "@/core/corem-error";
 import { getPool } from "@/db";
 import { Column, FinalColumn } from "@/types/column";
@@ -29,7 +30,7 @@ const fkeyCheckQuery = ({ table, column }: FkeyCheck) => {
         AND CONSTRAINT_NAME = 'PRIMARY';`;
 };
 
-export const isForeignKey = async (column: FinalColumn) => {
+export const isPrimaryKey = async (column: FinalColumn) => {
   const pool = await getPool();
   const query = fkeyCheckQuery({ table: column.table, column: column.name });
 
@@ -206,4 +207,91 @@ export const logger = {
   success: (msg: string) => console.log(`✅ ${msg} \n`),
   error: (msg: string) => console.error(`❌ ${msg}\n`),
   step: (msg: string) => console.log(`🚀 ${msg}\n`),
+};
+
+type fkeyCheckResult = RowDataPacket & {
+  TABLE_NAME: string;
+  COLUMN_NAME: string;
+  CONSTRAINT_NAME: string;
+  REFERENCED_TABLE_NAME: string;
+  REFERENCED_COLUMN_NAME: string;
+};
+
+export const dropForeignKeyConstraintIfExists = async ({
+  table,
+  column,
+}: {
+  table: string;
+  column: string;
+}) => {
+  const pool = await getPool();
+
+  const query = `SELECT
+    TABLE_NAME,
+    COLUMN_NAME,
+    CONSTRAINT_NAME,
+    REFERENCED_TABLE_NAME,
+    REFERENCED_COLUMN_NAME
+    FROM information_schema.KEY_COLUMN_USAGE
+    WHERE TABLE_NAME = '${table}'
+    AND COLUMN_NAME = '${column}'
+    AND REFERENCED_TABLE_NAME IS NOT NULL;`;
+
+  const [result] = await pool.query<fkeyCheckResult[]>(query);
+
+  if (result.length === 0) {
+    logger.info(`No foreign key constraint on ${column} !!`);
+    return;
+  }
+
+  console.log(result);
+
+  const { CONSTRAINT_NAME: fkeyConstraint } = result[0]!;
+
+  const sql = `ALTER TABLE ${table} DROP CONSTRAINT ${fkeyConstraint}`;
+
+  await pool.query(sql);
+
+  logger.success("fkey constraint deleted !!");
+};
+
+// This function will table the configschema and find all the columns to add => then arrange them to non foreign keys first then foreign keys
+// @returns : tables[]
+export const findAndSortTablesBasedOnColumnsToAdd = async (
+  configSchema: Table<Record<string, Column>>[],
+) => {
+  const tables: Table<Record<string, Column>>[] = [];
+  const pool = await getPool();
+
+  for (const table of configSchema) {
+    const { columns, name } = table;
+
+    const [result] = await pool.query<DescTableRow[]>(`DESC ${name}`);
+
+    const dbColumnSet: Set<string> = new Set(
+      result.map((column) => column.Field),
+    );
+
+    const newColumns = Object.fromEntries(
+      Object.entries(columns).filter(([_, column]) => {
+        if (!dbColumnSet.has(column.name)) return true;
+      }),
+    );
+
+    if(Object.keys(newColumns).length === 0) continue
+
+    tables.push({
+      name,
+      columns: newColumns,
+    });
+  }
+
+  return [
+    ...tables.filter(({ columns }) => {
+      return Object.values(columns).every((column) => !column.fkey);
+    }),
+    ...tables.filter(({ columns }) => {
+      return Object.values(columns).some((column) => column.fkey);
+    }),
+  ];
 };

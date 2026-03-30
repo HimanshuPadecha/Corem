@@ -1,10 +1,12 @@
 import { getPool } from "@/db";
-import { alterAddColumnParser } from "@/parser/add-coulmn";
+import {
+  alterAddColumnParser,
+  alterRemoveColumnParser,
+} from "@/parser/column-parser";
 import { Column } from "@/types/column";
 import { Table } from "@/types/table";
-import { logger } from "@/utils/utils";
+import { dropForeignKeyConstraintIfExists, logger } from "@/utils/utils";
 import { RowDataPacket } from "mysql2";
-import { CoremError } from "./corem-error";
 
 export type DescTableRow = RowDataPacket & {
   Field: string;
@@ -15,45 +17,60 @@ export type DescTableRow = RowDataPacket & {
   Extra: string;
 };
 
-// this function will take all the tables schema and check if the user have add an column or not if yes this function will populate that to database;
-export const tableColumnsAdditionCheck = async (
+// This function will get the table that have the columns to add to that table
+export const tableColumnsAddition = async (
   table: Table<Record<string, Column>>,
 ) => {
   try {
-    const { columns, name } = table;
+    const { columns } = table;
     const pool = await getPool();
 
-    if (!name) {
-      throw new CoremError({ code: "NOT_FOUND", message: "Table does not exists" });
-    }
-
-    const [result] = await pool.query<DescTableRow[]>(`DESC ${name}`);
-
-    const configColumns = Object.values(columns);
-
-    const dbColumnSet: Set<string> = new Set(
-      result.map((column) => column.Field),
-    );
-
-    const newColumns = configColumns.filter(
-      (column) => !dbColumnSet.has(column.name),
-    );
-
-    if (newColumns.length === 0) {
-      logger.info(`No new Columns to add for ${name} !`);
-      return;
-    }
+    const newColumns = Object.values(columns);
 
     const sql = await alterAddColumnParser(newColumns);
-    if (!sql) {
-      return;
-    }
 
     await pool.query(sql);
 
     logger.success(
       `Added columns : ${newColumns.map((column) => column.name).join(" , ")}`,
     );
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const tableColumnsDeletion = async (
+  table: Table<Record<string, Column>>,
+) => {
+  try {
+    const pool = await getPool();
+    const { name, columns } = table;
+
+    const [result] = await pool.query<DescTableRow[]>(`DESC ${name}`);
+
+    const dbColumns = result.map((column) => column.Field);
+    const configColumnsSet: Set<string> = new Set(
+      Object.values(columns).map((column) => column.name),
+    );
+
+    const columnsToRemove = dbColumns.filter(
+      (column) => !configColumnsSet.has(column),
+    );
+
+    await Promise.all(
+      columnsToRemove.map((column) =>
+        dropForeignKeyConstraintIfExists({ column, table: name }),
+      ),
+    );
+
+    const sql = alterRemoveColumnParser({
+      table: name,
+      columns: columnsToRemove,
+    });
+
+    await pool.query(sql);
+
+    logger.success(`Columns removed ${columnsToRemove.join(",")}`);
   } catch (error) {
     console.log(error);
   }

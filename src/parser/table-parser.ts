@@ -1,7 +1,7 @@
 import { CoremError } from "@/core/corem-error";
 import { Column, FinalColumn } from "@/types/column";
 import { Table } from "@/types/table";
-import { isForeignKey, isTableExists } from "@/utils/utils";
+import { isPrimaryKey, isTableExists } from "@/utils/utils";
 
 export const tableParser = async <T extends Record<string, Column>>(
   table: Table<T>,
@@ -40,7 +40,7 @@ export const tableParser = async <T extends Record<string, Column>>(
         });
       }
 
-      if (!(await isForeignKey(far))) {
+      if (!(await isPrimaryKey(far))) {
         throw new CoremError({
           code: "NOT_PRIMARY_KEY",
           message: "The key is not primary key !!",
