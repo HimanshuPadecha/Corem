@@ -4,6 +4,7 @@ import {
   checkAndRemoveTablesInDb,
 } from "@/core/table-updation";
 import {
+  deleteFkConstraintsFirstBeforeDeletingColumn,
   findAndSortTablesBasedOnColumnsToAdd,
   getConfig,
   getDbTables,
@@ -11,7 +12,10 @@ import {
   logger,
 } from "@/utils/utils";
 import dotenv from "dotenv";
-import { tableColumnsAddition } from "@/core/column-updation";
+import {
+  tableColumnsAddition,
+  tableColumnsDeletion,
+} from "@/core/column-updation";
 import { CoremError } from "@/core/corem-error";
 
 dotenv.config({ quiet: true });
@@ -57,6 +61,15 @@ export const push = async () => {
       for (const table of sortedTablesWithNewColumns) {
         await tableColumnsAddition(table);
       }
+    }
+
+    const tablesWithColumnsDelete =
+      await deleteFkConstraintsFirstBeforeDeletingColumn(configSchema);
+
+    if (tablesWithColumnsDelete.length > 0) {
+      await Promise.all(
+        tablesWithColumnsDelete.map((table) => tableColumnsDeletion(table)),
+      );
     }
 
     logger.success("Changes Applied !");

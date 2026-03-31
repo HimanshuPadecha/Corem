@@ -1,5 +1,6 @@
 import { closePool } from "@/db";
 import {
+  deleteFkConstraintsFirstBeforeDeletingColumn,
   dropForeignKeyConstraintIfExists,
   findAndSortTablesBasedOnColumnsToAdd,
   getConfig,
@@ -27,6 +28,18 @@ test("add column add fn check", async () => {
   );
 
   console.log(tablesWithNewColumns);
+});
+
+test("test delete fk constraints fn", async () => {
+  const coremConfig = await getConfig();
+
+  const configSchema = await getUserSchema(coremConfig);
+
+  const tables = await deleteFkConstraintsFirstBeforeDeletingColumn(
+    configSchema!,
+  );
+
+  console.log(tables);
 });
 
 afterAll(async () => {

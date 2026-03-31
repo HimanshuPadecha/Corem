@@ -39,38 +39,22 @@ export const tableColumnsAddition = async (
   }
 };
 
-export const tableColumnsDeletion = async (
-  table: Table<Record<string, Column>>,
-) => {
+export const tableColumnsDeletion = async (table: {
+  name: string;
+  columns: string[];
+}) => {
   try {
     const pool = await getPool();
     const { name, columns } = table;
 
-    const [result] = await pool.query<DescTableRow[]>(`DESC ${name}`);
-
-    const dbColumns = result.map((column) => column.Field);
-    const configColumnsSet: Set<string> = new Set(
-      Object.values(columns).map((column) => column.name),
-    );
-
-    const columnsToRemove = dbColumns.filter(
-      (column) => !configColumnsSet.has(column),
-    );
-
-    await Promise.all(
-      columnsToRemove.map((column) =>
-        dropForeignKeyConstraintIfExists({ column, table: name }),
-      ),
-    );
-
     const sql = alterRemoveColumnParser({
       table: name,
-      columns: columnsToRemove,
+      columns,
     });
 
     await pool.query(sql);
 
-    logger.success(`Columns removed ${columnsToRemove.join(",")}`);
+    logger.success(`Columns removed : ${columns.join(",")}`);
   } catch (error) {
     console.log(error);
   }

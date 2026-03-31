@@ -244,8 +244,6 @@ export const dropForeignKeyConstraintIfExists = async ({
     return;
   }
 
-  console.log(result);
-
   const { CONSTRAINT_NAME: fkeyConstraint } = result[0]!;
 
   const sql = `ALTER TABLE ${table} DROP CONSTRAINT ${fkeyConstraint}`;
@@ -255,7 +253,7 @@ export const dropForeignKeyConstraintIfExists = async ({
   logger.success("fkey constraint deleted !!");
 };
 
-// This function will table the configschema and find all the columns to add => then arrange them to non foreign keys first then foreign keys
+// This function will tabke table the configschema as input and find all the columns to add => then arrange them to non foreign keys first then foreign keys
 // @returns : tables[]
 export const findAndSortTablesBasedOnColumnsToAdd = async (
   configSchema: Table<Record<string, Column>>[],
@@ -278,7 +276,7 @@ export const findAndSortTablesBasedOnColumnsToAdd = async (
       }),
     );
 
-    if(Object.keys(newColumns).length === 0) continue
+    if (Object.keys(newColumns).length === 0) continue;
 
     tables.push({
       name,
@@ -294,4 +292,49 @@ export const findAndSortTablesBasedOnColumnsToAdd = async (
       return Object.values(columns).some((column) => column.fkey);
     }),
   ];
+};
+
+export const deleteFkConstraintsFirstBeforeDeletingColumn = async (
+  configSchema: Table<Record<string, Column>>[],
+) => {
+  const tables = [];
+  const pool = await getPool();
+
+  for (const table of configSchema) {
+    const { name, columns } = table;
+
+    const [result] = await pool.query<DescTableRow[]>(`DESC ${name}`);
+
+    const dbColumns = result.map((column) => column.Field);
+    const configColumnsSet: Set<string> = new Set(
+      Object.values(columns).map((column) => column.name),
+    );
+
+    const columnsToRemove = dbColumns.filter(
+      (column) => !configColumnsSet.has(column),
+    );
+
+    if (columnsToRemove.length === dbColumns.length) {
+      throw new CoremError({
+        code: "INVALID_REQUEST",
+        message:
+          "Cannot remove all the columns ! remove the whole table insted !!",
+      });
+    }
+
+    if (columnsToRemove.length === 0) continue;
+
+    await Promise.all(
+      columnsToRemove.map((column) =>
+        dropForeignKeyConstraintIfExists({ column, table: name }),
+      ),
+    );
+
+    tables.push({
+      name,
+      columns: columnsToRemove,
+    });
+  }
+
+  return tables;
 };
