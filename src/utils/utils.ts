@@ -253,7 +253,7 @@ export const dropForeignKeyConstraintIfExists = async ({
   logger.success("fkey constraint deleted !!");
 };
 
-// This function will tabke table the configschema as input and find all the columns to add => then arrange them to non foreign keys first then foreign keys
+// This function will take table the configschema as input and find all the columns to add => then arrange them to non foreign keys first then foreign keys
 // @returns : tables[]
 export const findAndSortTablesBasedOnColumnsToAdd = async (
   configSchema: Table<Record<string, Column>>[],

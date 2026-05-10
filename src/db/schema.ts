@@ -2,20 +2,17 @@ import { int, text, timestamp, varchar } from "@/columns";
 import { Table } from "@/core/table";
 
 export const users = Table("users", {
-  id: int("id").primaryKey().autoIncrement().notNull(),
+  id: int("id").primaryKey().notNull(),
   name: varchar("name", 255).notNull(),
-  address : text("address").notNull(),
-  new_home : text("new_home").notNull(),
-  home : varchar("home",255).notNull().default("This is default home"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  address: text("address"),
+  new_home: text("new_home"),
+  home: varchar("home", 255).notNull(),
+  createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow({ onUpdate: "CURRENT" }),
+    .notNull(),
 });
 
 export const posts = Table("posts", {
-  userId: int("user_id").references(() => users.columns.id, {
-    onDelete: "cascade",
-  }),
-  id : int("id").primaryKey().autoIncrement().notNull(),
+  userId: int("user_id"),
+  id: int("id"),
 });
