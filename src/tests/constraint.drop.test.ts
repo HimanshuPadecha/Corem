@@ -1,3 +1,4 @@
+import { checkConstraintsAndAdd, DbConstraintsOutput } from "@/core/constraints-updation";
 import { getPool } from "@/db";
 import { Constraint } from "@/types/constraints";
 import {
@@ -8,20 +9,8 @@ import {
 } from "@/utils/utils";
 import { RowDataPacket } from "mysql2";
 
-interface DbConstraintsOutput extends RowDataPacket {
-  COLUMN_NAME: string;
-  COLUMN_TYPE: string;
-  IS_NULLABLE: string;
-  COLUMN_DEFAULT: string;
-  COLUMN_KEY: string;
-  EXTRA: string;
-  CONSTRAINT_TYPE: string;
-  REFERENCED_TABLE_NAME: string;
-  REFERENCED_COLUMN_NAME: string;
-}
 
 test("constarint deletion test", async () => {
-  // i first have to find out that which table's which constraints are being deleted
 
   const coremConfig = await getConfig();
 
@@ -186,6 +175,18 @@ AND c.COLUMN_NAME = '${column}';`;
     }
   }
 });
+
+test("constraint add test", async () => {
+    const coremConfig = await getConfig()
+
+    const configschema = await getUserSchema(coremConfig)
+
+    if(!configschema){
+        return 
+    }
+
+    await checkConstraintsAndAdd(configschema)
+})
 
 afterAll(async () => {
   const pool = await getPool();

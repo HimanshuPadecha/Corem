@@ -17,6 +17,7 @@ import {
   tableColumnsDeletion,
 } from "@/core/column-updation";
 import { CoremError } from "@/core/corem-error";
+import { checkConstraintsAndDelete } from "@/core/constraints-updation";
 
 dotenv.config({ quiet: true });
 
@@ -71,6 +72,8 @@ export const push = async () => {
         tablesWithColumnsDelete.map((table) => tableColumnsDeletion(table)),
       );
     }
+
+    await checkConstraintsAndDelete(configSchema);
 
     logger.success("Changes Applied !");
   } catch (error) {

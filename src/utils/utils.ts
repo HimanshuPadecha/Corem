@@ -1,7 +1,9 @@
 import { DescTableRow } from "@/core/column-updation";
+import { DbConstraintsOutput } from "@/core/constraints-updation";
 import { CoremError } from "@/core/corem-error";
 import { getPool } from "@/db";
 import { Column, FinalColumn } from "@/types/column";
+import { Constraint } from "@/types/constraints";
 import { CoremConfig } from "@/types/corem-config";
 import { Table } from "@/types/table";
 import fs from "fs";
@@ -337,4 +339,44 @@ export const deleteFkConstraintsFirstBeforeDeletingColumn = async (
   }
 
   return tables;
+};
+
+export const parseDbConstrains = (
+  dbConstraints: DbConstraintsOutput,
+): Constraint[] => {
+  let parsedDbConstraints: Constraint[] = [];
+
+  if (dbConstraints.IS_NULLABLE === "NO") {
+    parsedDbConstraints.push("NOT NULL");
+  }
+
+  if (dbConstraints.COLUMN_DEFAULT !== null) {
+    if (dbConstraints.COLUMN_TYPE === "timestamp") {
+      if (
+        dbConstraints.EXTRA === "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+      ) {
+        parsedDbConstraints.push(
+          `DEFAULT ${dbConstraints.COLUMN_DEFAULT} ON UPDATE CURRENT_TIMESTAMP`,
+        );
+      } else {
+        parsedDbConstraints.push(`DEFAULT ${dbConstraints.COLUMN_DEFAULT}`);
+      }
+    } else {
+      parsedDbConstraints.push(`DEFAULT '${dbConstraints.COLUMN_DEFAULT}'`);
+    }
+  }
+
+  if (dbConstraints.COLUMN_KEY === "PRI") {
+    parsedDbConstraints.push("PRIMARY KEY");
+  }
+
+  if (dbConstraints.COLUMN_KEY === "UNI") {
+    parsedDbConstraints.push("UNIQUE");
+  }
+
+  if (dbConstraints.EXTRA === "auto_increment") {
+    parsedDbConstraints.push("AUTO_INCREMENT");
+  }
+
+  return parsedDbConstraints;
 };

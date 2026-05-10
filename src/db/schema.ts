@@ -2,11 +2,11 @@ import { int, text, timestamp, varchar } from "@/columns";
 import { Table } from "@/core/table";
 
 export const users = Table("users", {
-  id: int("id").primaryKey().notNull(),
+  id: int("id").notNull().primaryKey().autoIncrement(),
   name: varchar("name", 255).notNull(),
-  address: text("address"),
+  address: text("address").notNull(),
   new_home: text("new_home"),
-  home: varchar("home", 255).notNull(),
+  home: varchar("home", 255),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at")
     .notNull(),
