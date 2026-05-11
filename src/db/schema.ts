@@ -2,14 +2,14 @@ import { int, text, timestamp, varchar } from "@/columns";
 import { Table } from "@/core/table";
 
 export const users = Table("users", {
-  id: int("id").notNull().primaryKey().autoIncrement(),
-  name: varchar("name", 255).notNull(),
+  id: int("id").primaryKey().autoIncrement().notNull(),
+  name: varchar("name", 255).notNull().default("ramu"),
   address: text("address").notNull(),
   new_home: text("new_home"),
-  home: varchar("home", 255),
-  createdAt: timestamp("created_at").notNull(),
+  home: varchar("home", 255).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
-    .notNull(),
+    .notNull().defaultNow(),
 });
 
 export const posts = Table("posts", {

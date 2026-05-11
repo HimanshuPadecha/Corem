@@ -1,4 +1,7 @@
-import { checkConstraintsAndAdd, DbConstraintsOutput } from "@/core/constraints-updation";
+import {
+  checkConstraintsAndAdd,
+  DbConstraintsOutput,
+} from "@/core/constraints-updation";
 import { getPool } from "@/db";
 import { Constraint } from "@/types/constraints";
 import {
@@ -9,9 +12,7 @@ import {
 } from "@/utils/utils";
 import { RowDataPacket } from "mysql2";
 
-
 test("constarint deletion test", async () => {
-
   const coremConfig = await getConfig();
 
   const configSchema = await getUserSchema(coremConfig);
@@ -139,7 +140,6 @@ AND c.COLUMN_NAME = '${column}';`;
               );
 
               const sql = `ALTER TABLE ${table} MODIFY ${name} ${value.type} ${newConstraints.join(" ")}`;
-              console.log(sql);
               await pool.query(sql);
               logger.success(`auto_increment constraint removed on ${name} !!`);
               break;
@@ -177,16 +177,16 @@ AND c.COLUMN_NAME = '${column}';`;
 });
 
 test("constraint add test", async () => {
-    const coremConfig = await getConfig()
+  const coremConfig = await getConfig();
 
-    const configschema = await getUserSchema(coremConfig)
+  const configschema = await getUserSchema(coremConfig);
 
-    if(!configschema){
-        return 
-    }
+  if (!configschema) {
+    return;
+  }
 
-    await checkConstraintsAndAdd(configschema)
-})
+  await checkConstraintsAndAdd(configschema);
+});
 
 afterAll(async () => {
   const pool = await getPool();

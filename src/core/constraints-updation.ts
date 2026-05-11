@@ -180,8 +180,6 @@ export const checkConstraintsAndAdd = async (
         (constraint) => !constraintSet.has(constraint),
       );
 
-      console.log(constarintsToAdd);
-
       if (fkey && dbConstraints.CONSTRAINT_TYPE !== "FOREIGN KEY") {
         const { far, onDelete } = fkey;
 
@@ -209,49 +207,57 @@ export const checkConstraintsAndAdd = async (
         console.log(`Foreign key added on ${name}!`);
       }
 
-      for (const constriant of constarintsToAdd) {
-        switch (constriant) {
-          case "PRIMARY KEY": {
-            await pool.query(`ALTER TABLE ${table} ADD PRIMARY KEY (${name})`);
-            logger.success(`Primary key constraint added on ${name} !`);
-            break;
-          }
-
-          case "AUTO_INCREMENT": {
-            value.constraints.push("AUTO_INCREMENT");
-            await pool.query(
-              `ALTER TABLE ${table} MODIFY ${name} ${type} ${value.constraints.join(" ")}`,
-            );
-            logger.success(`Auto increment added on ${name} !`);
-            break;
-          }
-
-          case "NOT NULL": {
-            let constraints = value.constraints.filter(
-              (constraint) => constraint !== "PRIMARY KEY",
-            );
-            constraints.push("NOT NULL");
-            await pool.query(
-              `ALTER TABLE ${table} MODIFY ${name} ${type} ${constraints.join(" ")}`,
-            );
-            logger.success(`Not null constraint added on ${name} !`);
-            break;
-          }
-
-          case "UNIQUE": {
-            await pool.query(`ALTER TABLE ${table} ADD UNIQUE (${name})`);
-            logger.success(`Unique constraint added on ${name} !`);
-          }
-
-          default: {
-            if (constriant.startsWith("DEFAULT")) {
+      try {
+        for (const constraint of constarintsToAdd) {
+          switch (constraint) {
+            case "PRIMARY KEY": {
+              await pool.query(`ALTER TABLE ${table} ADD PRIMARY KEY (${name})`);
+              logger.success(`Primary key constraint added on ${name} !`);
+              break;
+            }
+  
+            case "AUTO_INCREMENT": {
+              let constraints = value.constraints.filter(constraint => constraint !== "PRIMARY KEY")
+              constraints.push("AUTO_INCREMENT");
               await pool.query(
-                `ALTER TABLE ${table} ALTER COLUMN ${name} SET ${constriant}`,
+                `ALTER TABLE ${table} MODIFY ${name} ${type} ${constraints.join(" ")}`,
               );
-              logger.success(`Default constraint added on ${name} !`)
+              logger.success(`Auto increment added on ${name} !`);
+              break;
+            }
+  
+            case "NOT NULL": {
+              let constraints = value.constraints.filter(
+                (constraint) => constraint !== "PRIMARY KEY",
+              );
+              constraints.push("NOT NULL");
+              await pool.query(
+                `ALTER TABLE ${table} MODIFY ${name} ${type} ${constraints.join(" ")}`,
+              );
+              logger.success(`Not null constraint added on ${name} !`);
+              break;
+            }
+  
+            case "UNIQUE": {
+              await pool.query(`ALTER TABLE ${table} ADD UNIQUE (${name})`);
+              logger.success(`Unique constraint added on ${name} !`);
+            }
+  
+            default: {
+              if (constraint.startsWith("DEFAULT")) {
+                let constriants = value.constraints.filter(constriant => constriant !== "PRIMARY KEY")
+                constriants.push(constraint)
+                await pool.query(
+                  `ALTER TABLE ${table} MODIFY COLUMN ${name} ${type} ${constriants.join(" ")}`,
+                );
+                logger.success(`Default constraint added on ${name} !`)
+              }
             }
           }
-        }
+        } 
+      } catch (error) {
+        console.log(error);
+        
       }
     }
   }
