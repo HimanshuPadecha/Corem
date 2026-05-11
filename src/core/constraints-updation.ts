@@ -114,7 +114,6 @@ export const checkConstraintsAndDelete = async (
               );
 
               const sql = `ALTER TABLE ${table} MODIFY ${name} ${value.type} ${newConstraints.join(" ")}`;
-              console.log(sql);
               await pool.query(sql);
               logger.success(`auto_increment constraint removed on ${name} !!`);
               break;
@@ -197,7 +196,7 @@ export const checkConstraintsAndAdd = async (
           });
         }
 
-        let sql = `ADD CONSTRAINT fk_${far.table} FOREIGN KEY (${name}) REFERENCES ${far.table}(${far.name}) `;
+        let sql = `ALTER TABLE ${table} ADD CONSTRAINT fk_${far.table} FOREIGN KEY (${name}) REFERENCES ${far.table}(${far.name});`;
 
         if (onDelete) {
           sql += `ON DELETE ${onDelete}`;
