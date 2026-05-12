@@ -1,5 +1,6 @@
 import { FinalColumn } from "@/types/column";
 import { Condition, Operator, Order, whereClause } from "@/types/query-parser";
+import { Table } from "@/types/table";
 
 export const desc = (column: FinalColumn): Order => {
   return { column, orderType: "DESC" };
@@ -61,7 +62,6 @@ export const like = (
 export const In = (column: FinalColumn, arg: FinalColumn | string | number) => {
   return makeCondition("IN", column, arg);
 };
-
 
 export const and = (...conditions: whereClause[]): whereClause => {
   return { type: "AND", conditions };

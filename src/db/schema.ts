@@ -13,6 +13,6 @@ export const users = Table("users", {
 });
 
 export const posts = Table("posts", {
-  userId: int("user_id"),
+  userId: int("user_id").references(() => users.columns.id).notNull(),
   id: int("id"),
 });

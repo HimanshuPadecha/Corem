@@ -1,5 +1,13 @@
+import { CoremError } from "@/core/corem-error";
 import { Column, FinalColumn } from "@/types/column";
-import { InferRow, InferSelection, Order, whereClause } from "@/types/query-parser";
+import {
+  Condition,
+  InferRow,
+  InferSelection,
+  Join,
+  Order,
+  whereClause,
+} from "@/types/query-parser";
 import { Table } from "@/types/table";
 import { Pool, RowDataPacket } from "mysql2/promise";
 
@@ -8,6 +16,7 @@ export abstract class BaseSelectionBuilder<TResult> {
   protected limitNo?: number;
   protected orders?: Order[];
   protected condition?: whereClause;
+  protected joins: Join<Record<string, FinalColumn>>[] = [];
 
   constructor(protected pool: Pool) {}
 
@@ -24,6 +33,65 @@ export abstract class BaseSelectionBuilder<TResult> {
   where(condition: whereClause): this {
     this.condition = condition;
     return this;
+  }
+
+  private addJoin<
+    U extends Record<string, FinalColumn> = Record<string, FinalColumn>,
+  >(
+    type: "INNER JOIN" | "RIGHT JOIN" | "LEFT JOIN",
+    table: Table<U>,
+    condition: Condition,
+  ): this {
+    const duplicate = this.joins.some((join) => join.table.name === table.name);
+    if (duplicate) {
+      throw new CoremError({
+        code: "INVALID_REQUEST",
+        message: "Already joined, use alias to join further",
+      });
+    }
+    const join: Join<U> = {
+      type,
+      condition,
+      table,
+    };
+
+    this.joins.push(join);
+    return this;
+  }
+
+  innerJoin<
+    U extends Record<string, FinalColumn> = Record<string, FinalColumn>,
+  >(table: Table<U>, condition: Condition): this {
+    return this.addJoin("INNER JOIN", table, condition);
+  }
+
+  leftJoin<U extends Record<string, FinalColumn> = Record<string, FinalColumn>>(
+    table: Table<U>,
+    condition: Condition,
+  ): this {
+    return this.addJoin("LEFT JOIN", table, condition);
+  }
+
+  rightJoin<
+    U extends Record<string, FinalColumn> = Record<string, FinalColumn>,
+  >(table: Table<U>, condition: Condition): this {
+    return this.addJoin("RIGHT JOIN", table, condition);
+  }
+
+  protected joinsParser(): string {
+    return this.joins
+      .map(({ condition, type, table }) => {
+        const { column, operator, columnTwo } = condition;
+
+        if (!columnTwo) {
+          throw new CoremError({
+            code: "NOT_FOUND",
+            message: "Two columns need to join the tables !!",
+          });
+        }
+        return `${type} ${table.name} ON ${column.table}.${column.name} ${operator} ${columnTwo.table}.${columnTwo.name}`;
+      })
+      .join(" ");
   }
 
   protected whereParser(): string {
@@ -109,7 +177,7 @@ export class SelectBuilder<
       })
       .join(", ");
 
-    let sql = `SELECT ${cols} FROM ${this._tableName} ${this.whereParser()} ${this.orderParser()} ${this.limitParser()};`;
+    let sql = `SELECT ${cols} FROM ${this._tableName} ${this.joinsParser()} ${this.whereParser()} ${this.orderParser()} ${this.limitParser()};`;
 
     const [rows] =
       await this.pool.query<(InferSelection<S> & RowDataPacket)[]>(sql);

@@ -1,4 +1,5 @@
 import { Column, FinalColumn } from "./column";
+import { Table } from "./table";
 
 export type sqlToTsTypes<T extends string> = T extends "int"
   ? number
@@ -39,3 +40,11 @@ export type Condition = {
   columnTwo?: FinalColumn;
   arg?: number | string | (number | string)[];
 };
+
+
+export type Join<T extends Record<string, FinalColumn>> = {
+    type: "INNER JOIN" | "RIGHT JOIN" | "LEFT JOIN";
+    table: Table<T>;
+    alias? : string
+    condition: Condition;
+  };
