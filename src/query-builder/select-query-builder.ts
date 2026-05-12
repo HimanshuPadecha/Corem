@@ -1,57 +1,102 @@
+import { Eq } from "@/core/query-utils";
 import { Column, FinalColumn } from "@/types/column";
+import { InferRow, InferSelection, Order } from "@/types/query-parser";
 import { Table } from "@/types/table";
 import { Pool, RowDataPacket } from "mysql2/promise";
 
-type sqlToTsTypes<T extends string> = T extends "int"
-  ? number
-  : T extends "varchar"
-    ? string
-    : T extends "text"
-      ? string
-      : T extends "boolean"
-        ? boolean
-        : T extends "timestamp"
-          ? Date
-          : any;
+export abstract class BaseSelectionBuilder<TResult> {
+  protected _tableName: string = "";
+  protected limitNo?: number;
+  protected orders?: Order[];
+  protected condition?: Eq;
 
-type InferSelection<S extends Record<string, FinalColumn>> = {
-  [K in keyof S]: sqlToTsTypes<S[K]["type"]>;
-};
-
-export class SelectBuilder<
-  S extends Record<string, FinalColumn> = Record<string, FinalColumn>,
-> {
-  private _tableName: string = "";
-  private limitNo?: number;
-
-  constructor(
-    private pool: Pool,
-    private selection?: S,
-  ) {}
-
-  from<U extends Record<string, FinalColumn>>(table: Table<U>): this {
-    this._tableName = table.name;
-    return this;
-  }
+  constructor(protected pool: Pool) {}
 
   limit(no: number): this {
     this.limitNo = no;
     return this;
   }
 
-  async execute(): Promise<InferSelection<S>[]> {
-    let cols;
-    if (this.selection) {
-      cols = Object.entries(this.selection)
-        .map(([alias, col]) => {
-          return `${col.table}.${col.name} AS ${alias}`;
-        })
-        .join(", ");
+  orderBy(...orders: Order[]): this {
+    this.orders = orders;
+    return this;
+  }
+
+  where(condition: Eq): this {
+    this.condition = condition;
+    return this;
+  }
+
+  protected whereParser(): string {
+    if (this.condition !== undefined) {
+      const { column, arg, columnTwo } = this.condition;
+      let sql = `WHERE ${column.tableName}.${column.name} = `;
+
+      if (arg) {
+        sql += arg;
+      }
+
+      if (columnTwo) {
+        sql += ` ${columnTwo.tableName}.${columnTwo.name} `;
+      }
+
+      return sql;
     }
 
-    let sql = `SELECT ${cols ? cols : "*"} FROM ${this._tableName}`;
+    return "";
+  }
 
-    if (this.limitNo !== undefined) sql += ` limit ${this.limitNo}`;
+  protected limitParser(): string {
+    if (this.limit !== undefined) {
+      return ` LIMIT ${this.limitNo} `;
+    }
+
+    return "";
+  }
+
+  protected orderParser(): string {
+    if (this.orders !== undefined) {
+      let sql = " ORDER BY ";
+
+      sql += this.orders
+        .map(
+          ({ column, orderType }) =>
+            ` ${column.table}.${column.name} ${orderType} `,
+        )
+        .join(",");
+
+      return sql;
+    }
+
+    return "";
+  }
+
+  abstract execute(): Promise<TResult[]>;
+}
+
+export class SelectBuilder<
+  S extends Record<string, FinalColumn> = Record<string, FinalColumn>,
+> extends BaseSelectionBuilder<InferSelection<S>> {
+  constructor(
+    pool: Pool,
+    private selection: S,
+  ) {
+    super(pool);
+  }
+
+  from<U extends Record<string, FinalColumn>>(table: Table<U>): this {
+    this._tableName = table.name;
+    return this;
+  }
+
+  async execute(): Promise<InferSelection<S>[]> {
+    const cols = Object.entries(this.selection)
+      .map(([alias, col]) => {
+        return `${col.table}.${col.name} AS ${alias}`;
+      })
+      .join(", ");
+
+    let sql = `SELECT ${cols} FROM ${this._tableName} ${this.whereParser()} ${this.orderParser()} ${this.limitParser()};`;
 
     const [rows] =
       await this.pool.query<(InferSelection<S> & RowDataPacket)[]>(sql);
@@ -70,28 +115,18 @@ export class StarBuilder {
   }
 }
 
-type InferRow<U extends Record<string, Column>> = {
-  [K in keyof U]: sqlToTsTypes<U[K]["type"]>;
-};
-
-export class StarSelectBuilder<U extends Record<string, Column>> {
-  private _limitNo?: number;
+export class StarSelectBuilder<
+  U extends Record<string, Column>,
+> extends BaseSelectionBuilder<InferRow<U>> {
   constructor(
-    private pool: Pool,
+    pool: Pool,
     private table: Table<U>,
-  ) {}
-
-  limit(no: number): this {
-    this._limitNo = no;
-    return this;
+  ) {
+    super(pool);
   }
 
   async execute(): Promise<InferRow<U>[]> {
-    let sql = `SELECT * FROM ${this.table.name}`;
-
-    if (this._limitNo !== undefined) {
-      sql += ` limit ${this._limitNo} `;
-    }
+    let sql = `SELECT * FROM ${this.table.name} ${this.whereParser()} ${this.orderParser()} ${this.limitParser()};`;
 
     const [rows] = await this.pool.query<(InferRow<U> & RowDataPacket)[]>(sql);
 

@@ -1,0 +1,27 @@
+import { Column, FinalColumn } from "./column";
+
+export type sqlToTsTypes<T extends string> = T extends "int"
+  ? number
+  : T extends "varchar"
+    ? string
+    : T extends "text"
+      ? string
+      : T extends "boolean"
+        ? boolean
+        : T extends "timestamp"
+          ? Date
+          : any;
+
+export type InferSelection<S extends Record<string, FinalColumn>> = {
+  [K in keyof S]: sqlToTsTypes<S[K]["type"]>;
+};
+
+export type InferRow<U extends Record<string, Column>> = {
+    [K in keyof U]: sqlToTsTypes<U[K]["type"]>;
+  };
+
+
+export type Order = {
+    column : FinalColumn,
+    orderType : "DESC" | "ASC"
+}

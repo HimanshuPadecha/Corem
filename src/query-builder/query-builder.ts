@@ -1,6 +1,6 @@
 import { Pool } from "mysql2/promise";
 import { SelectBuilder, StarBuilder } from "./select-query-builder";
-import { Column, FinalColumn } from "@/types/column";
+import { FinalColumn } from "@/types/column";
 
 export class QueryBuilder {
   constructor(private pool: Pool) {}
