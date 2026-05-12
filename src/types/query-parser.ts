@@ -25,3 +25,17 @@ export type Order = {
     column : FinalColumn,
     orderType : "DESC" | "ASC"
 }
+
+export type whereClause =
+  | Condition
+  | { type: "AND"; conditions: whereClause[] }
+  | { type: "OR"; conditions: whereClause[] };
+
+export type Operator = "=" | "!=" | "<" | ">" | "<=" | ">=" | "LIKE" | "IN";
+
+export type Condition = {
+  column: FinalColumn;
+  operator: Operator;
+  columnTwo?: FinalColumn;
+  arg?: number | string | (number | string)[];
+};

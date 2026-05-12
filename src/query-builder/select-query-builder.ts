@@ -1,6 +1,5 @@
-import { Eq } from "@/core/query-utils";
 import { Column, FinalColumn } from "@/types/column";
-import { InferRow, InferSelection, Order } from "@/types/query-parser";
+import { InferRow, InferSelection, Order, whereClause } from "@/types/query-parser";
 import { Table } from "@/types/table";
 import { Pool, RowDataPacket } from "mysql2/promise";
 
@@ -8,7 +7,7 @@ export abstract class BaseSelectionBuilder<TResult> {
   protected _tableName: string = "";
   protected limitNo?: number;
   protected orders?: Order[];
-  protected condition?: Eq;
+  protected condition?: whereClause;
 
   constructor(protected pool: Pool) {}
 
@@ -22,28 +21,42 @@ export abstract class BaseSelectionBuilder<TResult> {
     return this;
   }
 
-  where(condition: Eq): this {
+  where(condition: whereClause): this {
     this.condition = condition;
     return this;
   }
 
   protected whereParser(): string {
-    if (this.condition !== undefined) {
-      const { column, arg, columnTwo } = this.condition;
-      let sql = `WHERE ${column.tableName}.${column.name} = `;
+    if (!this.condition) return "";
+    return `WHERE ${this.parseClause(this.condition)}`;
+  }
 
-      if (arg) {
-        sql += arg;
-      }
-
-      if (columnTwo) {
-        sql += ` ${columnTwo.tableName}.${columnTwo.name} `;
-      }
-
-      return sql;
+  private parseClause(clause: whereClause): string {
+    if ("type" in clause) {
+      const inner = clause.conditions
+        .map((condition) => `${this.parseClause(condition)}`)
+        .join(` ${clause.type} `);
+      return inner;
     }
 
-    return "";
+    const { column, operator, arg, columnTwo } = clause;
+
+    const left = `${column.table}.${column.name}`;
+
+    if (columnTwo) {
+      return `${left} ${operator} ${columnTwo.table}.${columnTwo.name}`;
+    }
+
+    if (Array.isArray(arg)) {
+      const vals = arg
+        .map((v) => (typeof v === "string" ? `'${v}'` : v))
+        .join(", ");
+      return `${left} IN (${vals})`;
+    }
+
+    const val = typeof arg === "string" ? `'${arg}'` : arg;
+
+    return `${left} ${operator} ${val}`;
   }
 
   protected limitParser(): string {
