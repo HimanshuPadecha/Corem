@@ -22,6 +22,15 @@ test("simple query", async () => {
   }
 });
 
+test("delete", async() => {
+  const pool = await getPool()
+
+  const [rows] = await pool.query("DELETE FROM users WHERE users.id = 1;")
+
+  console.log(rows);
+  
+})
+
 afterAll(async () => {
   const pool = await getPool();
   pool.end();
