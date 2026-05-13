@@ -1,7 +1,8 @@
 import { CommonConstraints, ConstraintMethods } from "@/core/common-constrains";
 import { Column } from "@/types/column";
 
-export interface Varchar extends Column, ConstraintMethods<Varchar> {
+export interface Varchar
+  extends Column<`VARCHAR(${number})`>, ConstraintMethods<Varchar> {
   default: (chars: string) => Varchar;
 }
 

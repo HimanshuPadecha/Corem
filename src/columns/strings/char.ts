@@ -5,7 +5,7 @@ import { Varchar as Char } from "./varchar";
 export const char = (name: string, size: number): Char => {
   const base: Column = {
     name,
-    type: `CHAR(${size})`,
+    type: `CHAR(${size})` ,
     constraints: [],
   };
 

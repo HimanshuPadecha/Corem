@@ -1,31 +1,32 @@
 import { Column, FinalColumn } from "./column";
 import { Table } from "./table";
 
-export type sqlToTsTypes<T extends string> = T extends "int"
+export type sqlToTsTypes<T extends string> = T extends "INT"
   ? number
-  : T extends "varchar"
+  : T extends `VARCHAR(${number})`
     ? string
-    : T extends "text"
+    : T extends "TEXT"
       ? string
-      : T extends "boolean"
+      : T extends "BOOLEAN"
         ? boolean
-        : T extends "timestamp"
+        : T extends "TIMESTAMP"
           ? Date
-          : any;
+          : T extends "FLOAT"
+            ? number
+            : any;
 
 export type InferSelection<S extends Record<string, FinalColumn>> = {
   [K in keyof S]: sqlToTsTypes<S[K]["type"]>;
 };
 
 export type InferRow<U extends Record<string, Column>> = {
-    [K in keyof U]: sqlToTsTypes<U[K]["type"]>;
-  };
-
+  [K in keyof U]: sqlToTsTypes<U[K]["type"]>;
+};
 
 export type Order = {
-    column : FinalColumn,
-    orderType : "DESC" | "ASC"
-}
+  column: FinalColumn;
+  orderType: "DESC" | "ASC";
+};
 
 export type whereClause =
   | Condition
@@ -41,10 +42,9 @@ export type Condition = {
   arg?: number | string | (number | string)[];
 };
 
-
 export type Join<T extends Record<string, FinalColumn>> = {
-    type: "INNER JOIN" | "RIGHT JOIN" | "LEFT JOIN";
-    table: Table<T>;
-    alias? : string
-    condition: Condition;
-  };
+  type: "INNER JOIN" | "RIGHT JOIN" | "LEFT JOIN";
+  table: Table<T>;
+  alias?: string;
+  condition: Condition;
+};

@@ -5,14 +5,14 @@ export type OnUpdate = {
   onUpdate: "CURRENT";
 };
 
-export interface TimeStamp extends Column, ConstraintMethods<TimeStamp> {
+export interface TimeStamp extends Column<"TIMESTAMP">, ConstraintMethods<TimeStamp> {
   defaultNow: (onupdate?: OnUpdate) => TimeStamp;
 }
 
 export const timestamp = (name: string): TimeStamp => {
   const base: Column = {
     name,
-    type: "TIMESTAMP",
+    type: "TIMESTAMP" as const,
     constraints: [],
   };
 

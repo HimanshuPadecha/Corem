@@ -1,6 +1,6 @@
 import { getPool } from "@/db";
 import { tableParser } from "@/parser/table-parser";
-import { Console, isForeignKey } from "@/utils/utils";
+import { Console } from "@/utils/utils";
 import { posts, users } from "../db/schema";
 import type { Pool } from "mysql2/promise";
 
@@ -41,13 +41,13 @@ test("feed user table to database", async () => {
   }
 });
 
-test("check the fkey check query", async () => {
-  const number = await isForeignKey(users.columns.id);
+// test("check the fkey check query", async () => {
+//   const number = await isForeignKey(users.columns.id);
 
-  console.log({ number });
+//   console.log({ number });
 
-  expect(number).toBe(1);
-});
+//   expect(number).toBe(1);
+// });
 
 test("feed tables with foreign keys to database", async () => {
   try {

@@ -3,9 +3,9 @@ import { Column } from "@/types/column";
 import { CommonConstraints } from "@/core/common-constrains";
 
 export const bigInt = (name: string): BigInt => {
-  const base: Column = {
+  const base: Column<"BIGINT"> = {
     name,
-    type: "BIGINT",
+    type: "BIGINT" as const,
     constraints: [],
   };
 

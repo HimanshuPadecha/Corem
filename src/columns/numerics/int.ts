@@ -1,7 +1,7 @@
 import { Column } from "@/types/column";
 import { CommonConstraints, ConstraintMethods } from "@/core/common-constrains";
 
-export interface Int extends Column, ConstraintMethods<Int> {
+export interface Int extends Column<"INT">, ConstraintMethods<Int> {
   autoIncrement: () => Int;
   default: (num: number) => Int;
 }

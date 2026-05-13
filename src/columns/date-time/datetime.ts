@@ -5,7 +5,7 @@ import { TimeStamp as DateTime } from "./timestamp";
 export const datetime = (name: string): DateTime => {
   const base: Column = {
     name,
-    type: "DATETIME",
+    type: "DATETIME" as const,
     constraints: [],
   };
 

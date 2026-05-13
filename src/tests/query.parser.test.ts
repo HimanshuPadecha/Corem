@@ -2,6 +2,7 @@ import { corem } from "@/core/corem";
 import { and, asc, desc, eq, lt, ne } from "@/core/query-utils";
 import { getPool } from "@/db";
 import { posts, users } from "@/db/schema";
+import { sqlToTsTypes } from "@/types/query-parser";
 
 test("simple query", async () => {
   const db = await corem();
@@ -22,14 +23,24 @@ test("simple query", async () => {
   }
 });
 
-test("delete", async() => {
-  const pool = await getPool()
+test("insert", async () => {
+  const db = await corem();
 
-  const [rows] = await pool.query("DELETE FROM users WHERE users.id = 1;")
+  try {
+    await db.insert(users).values({ id: 12, name: "first" }).execute();
 
-  console.log(rows);
-  
-})
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.columns.id, 12))
+      .limit(1)
+      .execute();
+
+    console.log(user);
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 afterAll(async () => {
   const pool = await getPool();

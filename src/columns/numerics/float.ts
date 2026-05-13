@@ -1,7 +1,7 @@
 import { CommonConstraints, ConstraintMethods } from "@/core/common-constrains";
 import { Column } from "@/types/column";
 
-export interface Float extends ConstraintMethods<Float>, Column {
+export interface Float extends ConstraintMethods<Float>, Column<"FLOAT"> {
   unsigned: () => Float;
   default: (num: number) => Float;
 }
@@ -9,7 +9,7 @@ export interface Float extends ConstraintMethods<Float>, Column {
 export const float = (name: string): Float => {
   const base: Column = {
     name,
-    type: "FLOAT",
+    type: "FLOAT" as const,
     constraints: [],
   };
 

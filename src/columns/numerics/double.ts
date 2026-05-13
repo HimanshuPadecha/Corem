@@ -5,7 +5,7 @@ import { CommonConstraints } from "@/core/common-constrains";
 export const double = (name: string): Double => {
   const base: Column = {
     name,
-    type: "DOUBLE",
+    type: "DOUBLE" as const,
     constraints: [],
   };
 

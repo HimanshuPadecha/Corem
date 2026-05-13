@@ -1,8 +1,8 @@
 import { Constraint } from "./constraints";
 
-export type Column = {
+export type Column<T extends string = string> = {
   name: string;
-  type: string;
+  type: T;
   constraints: Constraint[];
   fkey?: {
     far: FinalColumn;

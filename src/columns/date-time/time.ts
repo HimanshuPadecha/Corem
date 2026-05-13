@@ -7,7 +7,7 @@ export type TimeDefault = {
   seconds: number;
 };
 
-export interface Time extends Column, ConstraintMethods<Time> {
+export interface Time extends Column<"TIME">, ConstraintMethods<Time> {
   defaultNow: () => Time;
   default: (time: TimeDefault) => Time;
 }
@@ -15,7 +15,7 @@ export interface Time extends Column, ConstraintMethods<Time> {
 export const time = (name: string): Time => {
   const base: Column = {
     name,
-    type: "TIME",
+    type: "TIME" as const,
     constraints: [],
   };
 

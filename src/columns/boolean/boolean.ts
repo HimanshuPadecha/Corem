@@ -2,7 +2,7 @@ import { Column } from "@/types/column";
 
 export type BooleanDefault = "TRUE" | "FALSE";
 
-export interface Boolean extends Column {
+export interface Boolean extends Column<"BOOLEAN"> {
   notNull: () => Boolean;
   default: (state: BooleanDefault) => Boolean;
   unique: () => Boolean;

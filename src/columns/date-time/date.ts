@@ -15,7 +15,7 @@ export interface Date extends Column, ConstraintMethods<Date> {
 export const date = (name: string): Date => {
   const base: Column = {
     name,
-    type: "DATE",
+    type: "DATE" as const,
     constraints: [],
   };
 

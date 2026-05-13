@@ -14,7 +14,7 @@ export const sqlEnum = <T extends readonly string[]>(
 ): SqlEnum<T[number]> => {
   const base: Column = {
     name,
-    type: `ENUM(${constants.map(c => `'${c}'`).join(",")})`,
+    type: `ENUM(${constants.map(c => `'${c}'`).join(",")})` as const,
     constraints: [],
   };
 

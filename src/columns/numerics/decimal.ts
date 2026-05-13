@@ -13,7 +13,7 @@ export const decimal = (
 ): Decimal => {
   const base: Column = {
     name,
-    type: `DECIMAL(${precesion},${scale})`,
+    type: `DECIMAL(${precesion},${scale})` as const,
     constraints: [],
   };
 

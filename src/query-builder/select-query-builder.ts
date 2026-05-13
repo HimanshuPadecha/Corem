@@ -237,7 +237,7 @@ export class StarSelectBuilder<
   }
 
   async execute(): Promise<InferRow<U>[]> {
-    let sql = `SELECT * FROM ${this._tableName} ${this.joinsParser()} ${this.whereParser()} ${this.groupByParser()} ${this.havingParser()} ${this.orderParser()} ${this.limitParser()};`;
+    let sql = `SELECT * FROM ${this.table.name} ${this.joinsParser()} ${this.whereParser()} ${this.groupByParser()} ${this.havingParser()} ${this.orderParser()} ${this.limitParser()};`;
 
     const [rows] = await this.pool.query<(InferRow<U> & RowDataPacket)[]>(sql);
 
