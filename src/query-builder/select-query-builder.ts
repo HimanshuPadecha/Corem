@@ -17,6 +17,8 @@ export abstract class BaseSelectionBuilder<TResult> {
   protected orders?: Order[];
   protected condition?: whereClause;
   protected joins: Join<Record<string, FinalColumn>>[] = [];
+  protected groupByColumn?: FinalColumn;
+  protected havingCondition?: whereClause;
 
   constructor(protected pool: Pool) {}
 
@@ -33,6 +35,34 @@ export abstract class BaseSelectionBuilder<TResult> {
   where(condition: whereClause): this {
     this.condition = condition;
     return this;
+  }
+
+  groupBy(column: FinalColumn): this {
+    this.groupByColumn = column;
+    return this;
+  }
+
+  having(condition: whereClause): this {
+    if (this.groupBy === undefined) {
+      throw new CoremError({
+        code: "INVALID_REQUEST",
+        message: "Cannot use haivng without groupby !",
+      });
+    }
+    this.havingCondition = condition;
+    return this;
+  }
+
+  protected havingParser(): string {
+    if (this.havingCondition === undefined) return "";
+
+    return ` HAVING ${this.parseClause(this.havingCondition)} `;
+  }
+
+  protected groupByParser(): string {
+    if (this.groupByColumn === undefined) return "";
+
+    return ` GROUP BY ${this.groupByColumn.table}.${this.groupByColumn.name} `;
   }
 
   private addJoin<
@@ -177,7 +207,7 @@ export class SelectBuilder<
       })
       .join(", ");
 
-    let sql = `SELECT ${cols} FROM ${this._tableName} ${this.joinsParser()} ${this.whereParser()} ${this.orderParser()} ${this.limitParser()};`;
+    let sql = `SELECT ${cols} FROM ${this._tableName} ${this.joinsParser()} ${this.whereParser()} ${this.groupByParser()} ${this.havingParser()} ${this.orderParser()} ${this.limitParser()};`;
 
     const [rows] =
       await this.pool.query<(InferSelection<S> & RowDataPacket)[]>(sql);
@@ -207,7 +237,7 @@ export class StarSelectBuilder<
   }
 
   async execute(): Promise<InferRow<U>[]> {
-    let sql = `SELECT * FROM ${this.table.name} ${this.whereParser()} ${this.orderParser()} ${this.limitParser()};`;
+    let sql = `SELECT * FROM ${this._tableName} ${this.joinsParser()} ${this.whereParser()} ${this.groupByParser()} ${this.havingParser()} ${this.orderParser()} ${this.limitParser()};`;
 
     const [rows] = await this.pool.query<(InferRow<U> & RowDataPacket)[]>(sql);
 
