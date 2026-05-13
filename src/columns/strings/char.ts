@@ -1,6 +1,6 @@
-import { CommonConstraints } from "@/core/common-constrains";
-import { Column } from "@/types/column";
-import { Varchar as Char } from "./varchar";
+import { CommonConstraints } from "@/core/common-constrains.js";
+import { Column } from "@/types/column.js";
+import { Varchar as Char } from "./varchar.js";
 
 export const char = (name: string, size: number): Char => {
   const base: Column = {

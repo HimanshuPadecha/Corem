@@ -1,8 +1,8 @@
 import { Pool } from "mysql2/promise";
-import { SelectBuilder, StarBuilder } from "./select-query-builder";
-import { Column, FinalColumn } from "@/types/column";
-import { DeleteBuilder } from "./delete-query-builder";
-import { InsertBuilder } from "./insert-query-builder";
+import { SelectBuilder, StarBuilder } from "./select-query-builder.js";
+import { Column, FinalColumn } from "@/types/column.js";
+import { DeleteBuilder } from "./delete-query-builder.js";
+import { InsertBuilder } from "./insert-query-builder.js";
 
 export class QueryBuilder {
   constructor(private pool: Pool) {}

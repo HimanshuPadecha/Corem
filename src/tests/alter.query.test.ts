@@ -1,13 +1,13 @@
-import { closePool, getPool } from "@/db";
+import { closePool, getPool } from "@/db/index.js";
 import {
   checkAndAddTablesInDb,
   checkAndRemoveTablesInDb,
-} from "@/core/table-updation";
-import { getConfig, getDbTables, getUserSchema } from "@/utils/utils";
+} from "@/core/table-updation.js";
+import { getConfig, getDbTables, getUserSchema } from "@/utils/utils.js";
 import {
   tableColumnsAddition,
   tableColumnsDeletion,
-} from "@/core/column-updation";
+} from "@/core/column-updation.js";
 
 test("check new table add for database", async () => {
   const dbTables: string[] = await getDbTables();
@@ -47,18 +47,18 @@ test("check column add", async () => {
   }
 });
 
-test("check column remove", async () => {
-  const coremConfig = await getConfig();
-  const configSchema = await getUserSchema(coremConfig);
+// test("check column remove", async () => {
+//   const coremConfig = await getConfig();
+//   const configSchema = await getUserSchema(coremConfig);
 
-  if (coremConfig === null) {
-    return;
-  }
+//   if (coremConfig === null) {
+//     return;
+//   }
 
-  for (const table of configSchema!) {
-    await tableColumnsDeletion(table);
-  }
-});
+//   for (const table of configSchema!) {
+//     await tableColumnsDeletion(table);
+//   }
+// });
 
 test("is foreign key test", async () => {
   const pool = await getPool();

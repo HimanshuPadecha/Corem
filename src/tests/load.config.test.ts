@@ -1,11 +1,11 @@
-import { getConfig } from "@/utils/utils";
+import { getConfig } from "@/utils/utils.js";
 import path from "node:path";
 import fs from "fs";
-import { CoremError } from "@/core/corem-error";
-import { Column } from "@/types/column";
-import { tableParser } from "@/parser/table-parser";
-import { Table } from "@/types/table";
-import { getPool } from "@/db";
+import { CoremError } from "@/core/corem-error.js";
+import { Column } from "@/types/column.js";
+import { tableParser } from "@/parser/table-parser.js";
+import { Table } from "@/types/table.js";
+import { getPool } from "@/db/index.js";
 
 test("check import", async () => {
   const coremConfig = await getConfig();

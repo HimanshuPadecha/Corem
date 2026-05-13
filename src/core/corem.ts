@@ -1,12 +1,5 @@
-import { getPool } from "@/db";
-import { QueryBuilder } from "@/query-builder/query-builder";
-
-interface coremInput {
-  host: string;
-  user: string;
-  password: string;
-  database: string;
-}
+import { getPool } from "@/db/index.js";
+import { QueryBuilder } from "@/query-builder/query-builder.js";
 
 export const corem = async () => {
 

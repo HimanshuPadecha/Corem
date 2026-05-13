@@ -1,7 +1,7 @@
-import { getPool } from "@/db";
-import { tableParser } from "@/parser/table-parser";
-import { Console } from "@/utils/utils";
-import { posts, users } from "../db/schema";
+import { getPool } from "@/db/index.js";
+import { tableParser } from "@/parser/table-parser.js";
+import { Console } from "@/utils/utils.js";
+import { posts, users } from "../db/schema.js";
 import type { Pool } from "mysql2/promise";
 
 let pool: Pool;

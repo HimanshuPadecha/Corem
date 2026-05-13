@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-import { push } from "./commands/push";
+import "tsconfig-paths/register.js";
+import { push } from "./commands/push.js";
 
 const command = process.argv[2];
 

@@ -1,4 +1,4 @@
-import { Constraint } from "./constraints";
+import { Constraint } from "./constraints.js";
 
 export type Column<T extends string = string> = {
   name: string;

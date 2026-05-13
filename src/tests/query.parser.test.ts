@@ -1,8 +1,8 @@
-import { corem } from "@/core/corem";
-import { and, asc, desc, eq, lt, ne } from "@/core/query-utils";
-import { getPool } from "@/db";
-import { posts, users } from "@/db/schema";
-import { sqlToTsTypes } from "@/types/query-parser";
+import { corem } from "@/core/corem.js";
+import { and, asc, desc, eq, lt, ne } from "@/core/query-utils.js";
+import { getPool } from "@/db/index.js";
+import { posts, users } from "@/db/schema.js";
+import { sqlToTsTypes } from "@/types/query-parser.js";
 
 test("simple query", async () => {
   const db = await corem();

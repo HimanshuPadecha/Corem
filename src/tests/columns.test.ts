@@ -1,7 +1,7 @@
-import { int, varchar, sqlEnum } from "@/columns";
-import { Console } from "@/utils/utils";
-import { Table } from "@/core/table";
-import { tableParser } from "@/parser/table-parser";
+import { int, varchar, sqlEnum } from "@/columns/index.js";
+import { Console } from "@/utils/utils.js";
+import { Table } from "@/core/table.js";
+import { tableParser } from "@/parser/table-parser.js";
 
 test("int test", () => {
   const id = int("id").primaryKey().autoIncrement().notNull();

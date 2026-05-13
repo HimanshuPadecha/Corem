@@ -1,16 +1,16 @@
-import { getPool } from "@/db";
-import { Column } from "@/types/column";
-import { Constraint } from "@/types/constraints";
-import { Table } from "@/types/table";
+import { getPool } from "@/db/index.js";
+import { Column } from "@/types/column.js";
+import { Constraint } from "@/types/constraints.js";
+import { Table } from "@/types/table.js";
 import {
   dropForeignKeyConstraintIfExists,
   isPrimaryKey,
   isTableExists,
   logger,
   parseDbConstrains,
-} from "@/utils/utils";
+} from "@/utils/utils.js";
 import { RowDataPacket } from "mysql2";
-import { CoremError } from "./corem-error";
+import { CoremError } from "./corem-error.js";
 
 export interface DbConstraintsOutput extends RowDataPacket {
   COLUMN_NAME: string;

@@ -1,11 +1,11 @@
-import { getPool } from "@/db";
+import { getPool } from "@/db/index.js";
 import {
   alterAddColumnParser,
   alterRemoveColumnParser,
-} from "@/parser/column-parser";
-import { Column } from "@/types/column";
-import { Table } from "@/types/table";
-import { dropForeignKeyConstraintIfExists, logger } from "@/utils/utils";
+} from "@/parser/column-parser.js";
+import { Column } from "@/types/column.js";
+import { Table } from "@/types/table.js";
+import {  logger } from "@/utils/utils.js";
 import { RowDataPacket } from "mysql2";
 
 export type DescTableRow = RowDataPacket & {

@@ -1,7 +1,7 @@
-import { CoremError } from "@/core/corem-error";
-import { Column, FinalColumn } from "@/types/column";
-import { Table } from "@/types/table";
-import { isPrimaryKey, isTableExists } from "@/utils/utils";
+import { CoremError } from "@/core/corem-error.js";
+import { Column, FinalColumn } from "@/types/column.js";
+import { Table } from "@/types/table.js";
+import { isPrimaryKey, isTableExists } from "@/utils/utils.js";
 
 export const tableParser = async <T extends Record<string, Column>>(
   table: Table<T>,

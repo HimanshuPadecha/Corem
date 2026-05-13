@@ -1,13 +1,13 @@
-import { getPool } from "@/db";
-import { tableParser } from "@/parser/table-parser";
-import { Column } from "@/types/column";
-import { Table } from "@/types/table";
+import { getPool } from "@/db/index.js";
+import { tableParser } from "@/parser/table-parser.js";
+import { Column } from "@/types/column.js";
+import { Table } from "@/types/table.js";
 import {
   getTablesWithForeignKeys,
   getTablesWithoutForeignKeys,
   logger,
   tablePartitionsToDeleteThem,
-} from "@/utils/utils";
+} from "@/utils/utils.js";
 
 export const checkAndAddTablesInDb = async (
   dbTables: string[],

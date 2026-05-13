@@ -1,5 +1,5 @@
-import { CoremError } from "@/core/corem-error";
-import { Column, FinalColumn } from "@/types/column";
+import { CoremError } from "@/core/corem-error.js";
+import { Column, FinalColumn } from "@/types/column.js";
 import {
   Condition,
   InferRow,
@@ -7,8 +7,8 @@ import {
   Join,
   Order,
   whereClause,
-} from "@/types/query-parser";
-import { Table } from "@/types/table";
+} from "@/types/query-parser.js";
+import { Table } from "@/types/table.js";
 import { Pool, RowDataPacket } from "mysql2/promise";
 
 export abstract class BaseSelectionBuilder<TResult> {
@@ -158,7 +158,7 @@ export abstract class BaseSelectionBuilder<TResult> {
   }
 
   protected limitParser(): string {
-    if (this.limit !== undefined) {
+    if (this.limitNo !== undefined) {
       return ` LIMIT ${this.limitNo} `;
     }
 
@@ -212,6 +212,8 @@ export class SelectBuilder<
     const [rows] =
       await this.pool.query<(InferSelection<S> & RowDataPacket)[]>(sql);
 
+    this.pool.end();
+
     return rows;
   }
 }
@@ -240,6 +242,8 @@ export class StarSelectBuilder<
     let sql = `SELECT * FROM ${this.table.name} ${this.joinsParser()} ${this.whereParser()} ${this.groupByParser()} ${this.havingParser()} ${this.orderParser()} ${this.limitParser()};`;
 
     const [rows] = await this.pool.query<(InferRow<U> & RowDataPacket)[]>(sql);
+
+    this.pool.end()
 
     return rows;
   }

@@ -1,6 +1,6 @@
-import { Float as Decimal } from "./float";
-import { Column } from "@/types/column";
-import { CommonConstraints } from "@/core/common-constrains";
+import { Float as Decimal } from "./float.js";
+import { Column } from "@/types/column.js";
+import { CommonConstraints } from "@/core/common-constrains.js";
 
 interface decimalPrecesion {
   precesion: number;

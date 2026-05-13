@@ -1,4 +1,4 @@
-import { Column } from "@/types/column";
+import { Column } from "@/types/column.js";
 
 type Text = Column<"TEXT"> & {
   notNull: () => Text;

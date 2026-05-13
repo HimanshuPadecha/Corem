@@ -1,8 +1,8 @@
-import { getPool } from "@/db";
+import { getPool } from "@/db/index.js";
 import {
   checkAndAddTablesInDb,
   checkAndRemoveTablesInDb,
-} from "@/core/table-updation";
+} from "@/core/table-updation.js";
 import {
   deleteFkConstraintsFirstBeforeDeletingColumn,
   findAndSortTablesBasedOnColumnsToAdd,
@@ -10,17 +10,16 @@ import {
   getDbTables,
   getUserSchema,
   logger,
-} from "@/utils/utils";
+} from "@/utils/utils.js";
 import dotenv from "dotenv";
 import {
   tableColumnsAddition,
   tableColumnsDeletion,
-} from "@/core/column-updation";
-import { CoremError } from "@/core/corem-error";
+} from "@/core/column-updation.js";
 import {
   checkConstraintsAndAdd,
   checkConstraintsAndDelete,
-} from "@/core/constraints-updation";
+} from "@/core/constraints-updation.js";
 
 dotenv.config({ quiet: true });
 

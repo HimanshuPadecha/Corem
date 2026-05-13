@@ -1,4 +1,4 @@
-import { Column, FinalColumn, FkeyDelete } from "@/types/column";
+import { Column, FinalColumn, FkeyDelete } from "@/types/column.js";
 
 
 export type FkeyOnDeleteObj = {

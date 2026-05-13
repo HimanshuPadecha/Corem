@@ -1,5 +1,5 @@
-import { CommonConstraints, ConstraintMethods } from "@/core/common-constrains";
-import { Column } from "@/types/column";
+import { CommonConstraints, ConstraintMethods } from "@/core/common-constrains.js";
+import { Column } from "@/types/column.js";
 
 export type OnUpdate = {
   onUpdate: "CURRENT";

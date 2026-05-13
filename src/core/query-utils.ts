@@ -1,6 +1,5 @@
-import { FinalColumn } from "@/types/column";
-import { Condition, Operator, Order, whereClause } from "@/types/query-parser";
-import { Table } from "@/types/table";
+import { FinalColumn } from "@/types/column.js";
+import { Condition, Operator, Order, whereClause } from "@/types/query-parser.js";
 
 export const desc = (column: FinalColumn): Order => {
   return { column, orderType: "DESC" };

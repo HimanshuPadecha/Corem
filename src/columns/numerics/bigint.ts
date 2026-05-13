@@ -1,6 +1,6 @@
-import { Int as BigInt } from "./int";
-import { Column } from "@/types/column";
-import { CommonConstraints } from "@/core/common-constrains";
+import { Int as BigInt } from "./int.js";
+import { Column } from "@/types/column.js";
+import { CommonConstraints } from "@/core/common-constrains.js";
 
 export const bigInt = (name: string): BigInt => {
   const base: Column<"BIGINT"> = {

@@ -1,6 +1,6 @@
-import { Float as Double } from "./float";
-import { Column } from "@/types/column";
-import { CommonConstraints } from "@/core/common-constrains";
+import { Float as Double } from "./float.js";
+import { Column } from "@/types/column.js";
+import { CommonConstraints } from "@/core/common-constrains.js";
 
 export const double = (name: string): Double => {
   const base: Column = {

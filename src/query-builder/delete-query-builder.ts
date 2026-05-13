@@ -1,6 +1,6 @@
-import { Column } from "@/types/column";
-import { InferRow, whereClause } from "@/types/query-parser";
-import { Table } from "@/types/table";
+import { Column } from "@/types/column.js";
+import { InferRow, whereClause } from "@/types/query-parser.js";
+import { Table } from "@/types/table.js";
 import { Pool, RowDataPacket } from "mysql2/promise";
 
 type Returning = "yes" | "no";
@@ -82,6 +82,8 @@ export class DeleteBuilder<
     let sql = `DELETE FROM ${this._tableName} ${this.whereParser()};`;
 
     await this.pool.query(sql);
+
+    this.pool.end()
 
     return (this.isReturning ? deletedRows : null) as any;
   }

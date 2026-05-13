@@ -1,6 +1,6 @@
-import { CoremError } from "@/core/corem-error";
-import { FinalColumn } from "@/types/column";
-import { isPrimaryKey, isTableExists  } from "@/utils/utils";
+import { CoremError } from "@/core/corem-error.js";
+import { FinalColumn } from "@/types/column.js";
+import { isPrimaryKey, isTableExists  } from "@/utils/utils.js";
 
 export const alterAddColumnParser = async (
   columns: FinalColumn[],

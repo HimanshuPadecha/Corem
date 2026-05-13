@@ -1,11 +1,11 @@
-import { closePool } from "@/db";
+import { closePool } from "@/db/index.js";
 import {
   deleteFkConstraintsFirstBeforeDeletingColumn,
   dropForeignKeyConstraintIfExists,
   findAndSortTablesBasedOnColumnsToAdd,
   getConfig,
   getUserSchema,
-} from "@/utils/utils";
+} from "@/utils/utils.js";
 
 test("get schema", async () => {
   const coremConfig = await getConfig();

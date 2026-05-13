@@ -1,5 +1,5 @@
-import { Column } from "@/types/column";
-import { CommonConstraints, ConstraintMethods } from "@/core/common-constrains";
+import { Column } from "@/types/column.js";
+import { CommonConstraints, ConstraintMethods } from "@/core/common-constrains.js";
 
 export interface Int extends Column<"INT">, ConstraintMethods<Int> {
   autoIncrement: () => Int;

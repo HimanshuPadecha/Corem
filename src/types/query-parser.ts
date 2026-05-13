@@ -1,5 +1,5 @@
-import { Column, FinalColumn } from "./column";
-import { Table } from "./table";
+import { Column, FinalColumn } from "./column.js";
+import { Table } from "./table.js";
 
 export type sqlToTsTypes<T extends string> = T extends "INT"
   ? number

@@ -1,4 +1,4 @@
-import { Column, FinalColumn } from "./column";
+import { Column, FinalColumn } from "./column.js";
 
 export type Table<T extends Record<string, Column>> = {
   name: string;

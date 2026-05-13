@@ -1,4 +1,4 @@
-import { Column } from "@/types/column";
+import { Column } from "@/types/column.js";
 
 export type BooleanDefault = "TRUE" | "FALSE";
 

@@ -1,4 +1,4 @@
-import { defineConfig } from "@/core/define-config";
+import { defineConfig } from "corem/config";
 
 export default defineConfig({
   schema: "src/db/schema.ts",

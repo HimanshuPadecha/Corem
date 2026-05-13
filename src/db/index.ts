@@ -1,6 +1,6 @@
 import mysql, { Pool } from "mysql2/promise";
 import dotenv from "dotenv";
-import { getConfig } from "@/utils/utils";
+import { getConfig } from "@/utils/utils.js";
 
 dotenv.config();
 

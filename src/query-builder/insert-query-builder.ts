@@ -1,7 +1,7 @@
-import { CoremError } from "@/core/corem-error";
-import { Column, FinalColumn } from "@/types/column";
-import { sqlToTsTypes } from "@/types/query-parser";
-import { Table } from "@/types/table";
+import { CoremError } from "@/core/corem-error.js";
+import { Column, FinalColumn } from "@/types/column.js";
+import { sqlToTsTypes } from "@/types/query-parser.js";
+import { Table } from "@/types/table.js";
 import { Pool } from "mysql2/promise";
 
 type InferInsertValues<U extends Record<string, Column>> = {
@@ -35,6 +35,8 @@ export class InsertBuilder<T extends Record<string, Column>> {
 
     let sql = `INSERT INTO ${this.table.name} (${columns}) VALUES (${placeholders})`;
 
+
     await this.pool.query(sql, params);
+    this.pool.end()
   }
 }

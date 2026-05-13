@@ -1,6 +1,6 @@
-import { CommonConstraints } from "@/core/common-constrains";
-import { Column } from "@/types/column";
-import { TimeStamp as DateTime } from "./timestamp";
+import { CommonConstraints } from "@/core/common-constrains.js";
+import { Column } from "@/types/column.js";
+import { TimeStamp as DateTime } from "./timestamp.js";
 
 export const datetime = (name: string): DateTime => {
   const base: Column = {

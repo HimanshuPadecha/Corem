@@ -1,31 +1,45 @@
 {
   "name": "corem",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Type-safe MYSQL ORM and migration tool",
+  "main": "./dist/src/index.js",
   "scripts": {
     "test": "jest",
-    "corem": "tsx ./src/cli.ts"
+    "build": "tsc && tsc-alias",
+     "prepublishOnly": "npm run build"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "orm",
+    "mysql",
+    "typescript",
+    "sql",
+    "migration"
+  ],
+  "author": "Himanshu Padecha",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^25.5.0",
     "jest": "^30.3.0",
     "ts-jest": "^29.4.6",
     "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.17",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "dotenv": "^17.3.1",
     "jiti": "^2.6.1",
     "mysql2": "^3.20.0",
+    "tsconfig-paths": "^4.2.0",
     "tsx": "^4.21.0"
   },
   "bin": {
-    "corem": "./dist/cli.js"
+    "corem": "./dist/src/cli.js"
+  },
+  "files" : ["dist"],
+  "exports": {
+    "." : "./dist/src/index.js",
+    "./config": "./dist/src/core/define-config.js"
   }
 }

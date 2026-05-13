@@ -1,14 +1,16 @@
-import { DescTableRow } from "@/core/column-updation";
-import { DbConstraintsOutput } from "@/core/constraints-updation";
-import { CoremError } from "@/core/corem-error";
-import { getPool } from "@/db";
-import { Column, FinalColumn } from "@/types/column";
-import { Constraint } from "@/types/constraints";
-import { CoremConfig } from "@/types/corem-config";
-import { Table } from "@/types/table";
+import { DescTableRow } from "@/core/column-updation.js";
+import { DbConstraintsOutput } from "@/core/constraints-updation.js";
+import { CoremError } from "@/core/corem-error.js";
+import { getPool } from "@/db/index.js";
+import { Column, FinalColumn } from "@/types/column.js";
+import { Constraint } from "@/types/constraints.js";
+import { CoremConfig } from "@/types/corem-config.js";
+import { Table } from "@/types/table.js";
 import fs from "fs";
 import { RowDataPacket } from "mysql2";
 import path from "path";
+import { createJiti } from "jiti";
+import { jiti } from "./jiti.js";
 
 type FkeyCheck = {
   table: string;
@@ -81,12 +83,13 @@ export const getConfig = async (): Promise<CoremConfig> => {
     });
   }
 
-  const coremCongig = (await import(path.join(root, "corem.config.ts")))
-    .default as CoremConfig;
+  const coremConfig = (await jiti.import(
+    path.join(root, "corem.config.ts"),
+  )) as CoremConfig;
 
-  validateConfig(coremCongig);
+  validateConfig(coremConfig);
 
-  return coremCongig;
+  return coremConfig;
 };
 
 const validateConfig = (coremConfig: CoremConfig) => {
@@ -123,7 +126,13 @@ export const getUserSchema = async (coremConfig: CoremConfig) => {
 
   const root = process.cwd();
 
-  const schema = await import(path.resolve(root, schemaPath));
+  const imported = await jiti.import(path.resolve(root, schemaPath));
+
+  if (imported == null || typeof imported !== "object") {
+    return null;
+  }
+
+  const schema = imported as Record<string, unknown>;
 
   const values = Object.values(schema);
 
