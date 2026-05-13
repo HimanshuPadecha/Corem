@@ -23,20 +23,14 @@ test("simple query", async () => {
   }
 });
 
-test("insert", async () => {
+test("delete", async () => {
   const db = await corem();
 
   try {
-    await db.insert(users).values({ id: 12, name: "first" }).execute();
+    // await db.insert(users).values({ id: 12, name: "first" }).execute();
 
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.columns.id, 12))
-      .limit(1)
-      .execute();
+    await db.delete().from(users).where(eq(users.columns.id, 10)).execute();
 
-    console.log(user);
   } catch (error) {
     console.log(error);
   }

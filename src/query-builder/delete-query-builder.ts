@@ -1,18 +1,26 @@
-import { FinalColumn } from "@/types/column";
+import { Column } from "@/types/column";
 import { InferRow, whereClause } from "@/types/query-parser";
 import { Table } from "@/types/table";
 import { Pool, RowDataPacket } from "mysql2/promise";
 
-export class DeleteBuilder<T extends Record<string, FinalColumn>> {
+type Returning = "yes" | "no";
+
+export class DeleteBuilder<
+  T extends Record<string, Column>,
+  R extends Returning = "no",
+> {
   private _tableName: string = "";
   private condition?: whereClause;
   private isReturning: boolean = false;
 
   constructor(private pool: Pool) {}
 
-  from<U extends Record<string, FinalColumn>>(table: Table<U>): this {
-    this._tableName = table.name;
-    return this;
+  from<U extends Record<string, Column>>(
+    table: Table<U>,
+  ): DeleteBuilder<U> {
+    const next = new DeleteBuilder<U>(this.pool);
+    next._tableName = table.name;
+    return next;
   }
 
   where(condition: whereClause): this {
@@ -29,7 +37,7 @@ export class DeleteBuilder<T extends Record<string, FinalColumn>> {
   private parseClause(clause: whereClause): string {
     if ("type" in clause) {
       const inner = clause.conditions
-        .map((condition) => `${this.parseClause(condition)}`)
+        .map((condition) => ` ${this.parseClause(condition)} `)
         .join(`${clause.type}`);
       return inner;
     }
@@ -54,12 +62,13 @@ export class DeleteBuilder<T extends Record<string, FinalColumn>> {
     return `${left} ${operator} ${val}`;
   }
 
-  returning(): this {
-    this.isReturning = true;
-    return this;
+  returning(): DeleteBuilder<T, "yes"> {
+    const next = this as unknown as DeleteBuilder<T, "yes">;
+    next.isReturning = true;
+    return next;
   }
 
-  async execute(): Promise<InferRow<T>[] | null> {
+  async execute(): Promise<R extends "yes" ? InferRow<T>[] : null> {
     let deletedRows: InferRow<T>[] = [];
 
     if (this.isReturning) {
@@ -74,6 +83,6 @@ export class DeleteBuilder<T extends Record<string, FinalColumn>> {
 
     await this.pool.query(sql);
 
-    return deletedRows ?? null;
+    return (this.isReturning ? deletedRows : null) as any;
   }
 }
