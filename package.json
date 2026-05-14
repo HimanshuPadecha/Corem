@@ -2,7 +2,7 @@
   "name": "@himanshupadecha/corem",
   "version": "1.0.3",
   "description": "Type-safe MYSQL ORM and migration tool",
-  "main": "./dist/src/index.js",
+  "main": "./dist/index.js",
   "publishConfig": {
     "access": "public"
   },
@@ -48,13 +48,13 @@
     "tsx": "^4.21.0"
   },
   "bin": {
-    "corem": "./dist/src/cli.js"
+    "corem": "./dist/cli.js"
   },
   "files": [
     "dist"
   ],
   "exports": {
-    ".": "./dist/src/index.js",
-    "./config": "./dist/src/core/define-config.js"
+    ".": "./dist/index.js",
+    "./config": "./dist/core/define-config.js"
   }
 }
