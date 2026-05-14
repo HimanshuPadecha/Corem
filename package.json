@@ -1,6 +1,6 @@
 {
   "name": "@himanshupadecha/corem",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Type-safe MYSQL ORM and migration tool",
   "main": "./dist/src/index.js",
   "publishConfig": {
@@ -10,7 +10,7 @@
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "build": "tsc && tsc-alias",
     "prepublishOnly": "npm run build",
-    "localconfig" : "rm -rf dist && rm -rf corem-1.0.0.tgz && npm run build && chmod +x dist/src/cli.js && npm pack"
+    "localconfig": "rm -rf dist && rm -rf corem-1.0.0.tgz && npm run build && chmod +x dist/src/cli.js && npm pack"
   },
   "keywords": [
     "orm",
