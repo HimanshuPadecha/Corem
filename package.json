@@ -27,8 +27,8 @@
     "url": "https://github.com/HimanshuPadecha/Corem/issues"
   },
   "homepage": "https://github.com/HimanshuPadecha/Corem#readme",
+  "license" : "ISC",
   "author": "Himanshu Padecha",
-  "license": "ISC",
   "type": "module",
   "devDependencies": {
     "@types/jest": "^30.0.0",
