@@ -212,7 +212,7 @@ export class SelectBuilder<
     const [rows] =
       await this.pool.query<(InferSelection<S> & RowDataPacket)[]>(sql);
 
-    this.pool.end();
+    // this.pool.end();
 
     return rows;
   }
@@ -243,7 +243,7 @@ export class StarSelectBuilder<
 
     const [rows] = await this.pool.query<(InferRow<U> & RowDataPacket)[]>(sql);
 
-    this.pool.end()
+    // this.pool.end()
 
     return rows;
   }

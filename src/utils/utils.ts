@@ -113,7 +113,19 @@ const validateConfig = (coremConfig: CoremConfig) => {
 
   const { db_name, host, password, user } = credentials;
 
-  if (!db_name || !host || !password || !user) {
+  // if (!db_name || !host || !password || !user) {
+  //   throw new CoremError({
+  //     code: "NOT_FOUND",
+  //     message: "Credentials not found",
+  //   });
+  // }
+
+  if (
+    db_name == null ||
+    host == null ||
+    user == null ||
+    password == null
+  ) {
     throw new CoremError({
       code: "NOT_FOUND",
       message: "Credentials not found",

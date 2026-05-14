@@ -1,4 +1,5 @@
 import { defineConfig } from "corem/config";
+import "dotenv/config.js"
 
 export default defineConfig({
   schema: "src/db/schema.ts",

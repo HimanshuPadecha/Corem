@@ -4,9 +4,10 @@
   "description": "Type-safe MYSQL ORM and migration tool",
   "main": "./dist/src/index.js",
   "scripts": {
-    "test": "jest",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "build": "tsc && tsc-alias",
-     "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "localconfig" : "rm -rf dist && rm -rf corem-1.0.0.tgz && npm run build && chmod +x dist/src/cli.js && npm pack"
   },
   "keywords": [
     "orm",
@@ -21,8 +22,9 @@
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^25.5.0",
-    "jest": "^30.3.0",
-    "ts-jest": "^29.4.6",
+    "cross-env": "^10.1.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.9",
     "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.17",
     "typescript": "^5.9.3"
@@ -37,9 +39,11 @@
   "bin": {
     "corem": "./dist/src/cli.js"
   },
-  "files" : ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
-    "." : "./dist/src/index.js",
+    ".": "./dist/src/index.js",
     "./config": "./dist/src/core/define-config.js"
   }
 }

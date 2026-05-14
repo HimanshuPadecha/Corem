@@ -3,7 +3,7 @@ import { InferRow, whereClause } from "@/types/query-parser.js";
 import { Table } from "@/types/table.js";
 import { Pool, RowDataPacket } from "mysql2/promise";
 
-type Returning = "yes" | "no";
+export type Returning = "yes" | "no";
 
 export class DeleteBuilder<
   T extends Record<string, Column>,
@@ -83,7 +83,7 @@ export class DeleteBuilder<
 
     await this.pool.query(sql);
 
-    this.pool.end()
+    // this.pool.end()
 
     return (this.isReturning ? deletedRows : null) as any;
   }

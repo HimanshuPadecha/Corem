@@ -23,14 +23,22 @@ test("simple query", async () => {
   }
 });
 
-test("delete", async () => {
+test("update testing", async () => {
   const db = await corem();
 
   try {
     // await db.insert(users).values({ id: 12, name: "first" }).execute();
 
-    await db.delete().from(users).where(eq(users.columns.id, 10)).execute();
+    // await db.delete().from(users).where(eq(users.columns.id, 10)).execute();
 
+    const [updatedUser] = await db
+      .update(users)
+      .set({ name: "hello" })
+      .where(eq(users.columns.id, 10))
+      .returning()
+      .execute();
+
+    console.log(updatedUser);
   } catch (error) {
     console.log(error);
   }

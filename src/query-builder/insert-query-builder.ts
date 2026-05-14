@@ -37,6 +37,6 @@ export class InsertBuilder<T extends Record<string, Column>> {
 
 
     await this.pool.query(sql, params);
-    this.pool.end()
+    // this.pool.end()
   }
 }
