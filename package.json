@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Type-safe MYSQL ORM and migration tool",
   "main": "./dist/src/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "build": "tsc && tsc-alias",
