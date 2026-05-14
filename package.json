@@ -19,6 +19,14 @@
     "sql",
     "migration"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HimanshuPadecha/Corem.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HimanshuPadecha/Corem/issues"
+  },
+  "homepage": "https://github.com/HimanshuPadecha/Corem#readme",
   "author": "Himanshu Padecha",
   "license": "ISC",
   "type": "module",
