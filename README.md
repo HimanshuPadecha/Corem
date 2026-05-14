@@ -1,59 +1,60 @@
-# Corem
+# 🛡️ Corem
 
-Lightweight TypeScript ORM for SQL databases with a fluent query builder and type-safe schema definitions.
+**Lightweight, Type-safe MySQL ORM & Migration Tool for Modern TypeScript**
 
-## Features
+  [npm version](https://www.npmjs.com/package/corem)  
+  [TypeScript](https://www.typescriptlang.org/)  
+  [License](https://github.com/HimanshuPadecha/corem/blob/main/LICENSE)  
 
-* Type-safe schema definitions
-* Fluent SQL query builder
-* MySQL support
-* Strong TypeScript inference
-* Relations and foreign keys
-* Minimal and clean API
-* SQL-like syntax
-* Fast and lightweight
-* Built for modern TypeScript applications
+
+**Corem** is a powerful, minimal, and fully type-safe ORM built specifically for TypeScript and MySQL. Inspired by modern tooling like Drizzle, it provides a fluent SQL-like query builder, strong schema inference, and seamless migration commands—all without the bloated overhead.
+
+## ✨ Features
+
+- 🔒 **End-to-End Type Safety** - Catch errors at compile-time with strong TypeScript inference.
+- 🚀 **Fluent Query Builder** - Write SQL intuitively with a simple, chainable API.
+- 📦 **Zero-Config Migrations** - Automatically sync your schema to your database via CLI.
+- 🔗 **First-Class Relations** - Easily manage foreign keys and perform typed SQL joins.
+- 🪶 **Lightweight & Fast** - Minimal runtime footprint designed for high performance.
+- 🛠️ **Modern TypeScript** - Built for ES Modules, standard TypeScript, and modern tooling.
 
 ---
 
-# Installation
+## 📦 Installation
+
+Install `corem` alongside its peer dependencies (such as `mysql2` if you haven't already):
 
 ```bash
+# Using npm
 npm install corem
-```
 
-or
-
-```bash
+# Using yarn
 yarn add corem
-```
 
-or
-
-```bash
+# Using pnpm
 pnpm add corem
 ```
 
 ---
 
-# Setup Environment Variables
+## 🚀 Quick Start
 
-Create a `.env` file in the root of your project.
+### 1. Setup Environment Variables
+
+Create a `.env` file in the root of your project:
 
 ```env
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=password
-DB_NAME=test
+DB_NAME=my_database
 ```
 
----
+### 2. Configure Corem
 
-# Create Corem Config
+Create a `corem.config.ts` file in your project root to tell the CLI where your schema lives and how to connect to the database.
 
-Create a `corem.config.ts` file in the root of your project.
-
-```ts
+```typescript
 import { defineConfig } from "corem/config";
 
 export default defineConfig({
@@ -68,138 +69,67 @@ export default defineConfig({
 });
 ```
 
----
+### 3. Define Your Schema
 
-# Project Structure
+Define your tables using Corem's type-safe schema builder. Create `src/db/schema.ts`:
 
-```txt
-.
-├── corem.config.ts
-├── .env
-├── src/
-│   └── db/
-│       ├── index.ts
-│       └── schema.ts
-└── package.json
-```
-
----
-
-# Create Database Instance
-
-Create `src/db/index.ts`
-
-```ts
-import { corem } from "corem";
-
-const getDb = async () => {
-  return await corem();
-};
-
-export const db = await getDb();
-```
-
----
-
-# Create Schema
-
-Create `src/db/schema.ts`
-
-```ts
-import { int, text, timestamp, varchar } from "@/columns/index.js";
-import { Table } from "@/core/table.js";
+```typescript
+import { int, varchar, text, timestamp } from "corem/columns";
+import { Table } from "corem/core";
 
 export const users = Table("users", {
-  id: int("id")
-    .primaryKey()
-    .autoIncrement()
-    .notNull(),
-
-  name: varchar("name", 255),
-
-  address: text("address"),
-
-  new_home: text("new_home")
-    .notNull(),
-
-  home: varchar("home", 255)
-    .notNull(),
-
-  createdAt: timestamp("created_at")
-    .notNull()
-    .defaultNow(),
-
-  updatedAt: timestamp("updated_at")
-    .defaultNow(),
+  id: int("id").primaryKey().autoIncrement().notNull(),
+  name: varchar("name", 255).notNull(),
+  email: varchar("email", 255).notNull().unique(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const posts = Table("posts", {
+  id: int("id").primaryKey().autoIncrement(),
+  title: varchar("title", 255).notNull(),
   userId: int("user_id")
-    .references(() => users.columns.id)
+    .references(() => users.columns.id, { onDelete: "cascade" })
     .notNull(),
-
-  id: int("id"),
 });
 ```
 
----
+### 4. Push Schema to Database
 
-# Push Schema To Database
+Use the Corem CLI to automatically sync your defined schema with your MySQL database:
 
 ```bash
 npx corem push
 ```
 
----
+### 5. Initialize the Database Client
 
-# Select Queries
+Create an instance of the database to execute queries. Create `src/db/index.ts`:
 
-```ts
-import {
-  mysqlTable,
-  int,
-  varchar,
-  timestamp,
-} from "corem";
+```typescript
+import { corem } from "corem";
 
-export const users = mysqlTable("users", {
-  id: int("id").primaryKey().autoIncrement(),
-
-  name: varchar("name", 255).notNull(),
-
-  email: varchar("email", 255)
-    .notNull()
-    .unique(),
-
-  createdAt: timestamp("created_at")
-    .defaultNow(),
-});
+// Initialize and export the database connection
+export const db = await corem();
 ```
 
 ---
 
-# Select Queries
+## 📖 Query Builder API
 
-## Basic Select
+Corem provides a fluent, SQL-like query builder that is 100% type-safe based on your schema.
 
-```ts
-const result = await db
-  .select()
-  .from(users)
-  .execute();
+### Select Queries
+
+#### Basic Select
+
+```typescript
+const allUsers = await db.select().from(users).execute();
+// SELECT * FROM users;
 ```
 
-Generated SQL:
+#### Select Specific Columns
 
-```sql
-SELECT * FROM users;
-```
-
----
-
-## Select Specific Columns
-
-```ts
+```typescript
 const result = await db
   .select({
     id: users.columns.id,
@@ -207,110 +137,54 @@ const result = await db
   })
   .from(users)
   .execute();
+// SELECT users.id AS id, users.name AS username FROM users;
 ```
 
-Generated SQL:
+#### Where Conditions
 
-```sql
-SELECT users.id AS id, users.name AS username FROM users;
-```
+```typescript
+import { eq, and } from "corem/utils";
 
----
-
-# Where Conditions
-
-```ts
 const result = await db
   .select()
   .from(users)
   .where(
     and(
       eq(users.columns.id, 1),
-      eq(users.columns.name, "first"),
-    ),
+      eq(users.columns.name, "John")
+    )
   )
   .execute();
 ```
 
-Generated SQL:
+### Insert Queries
 
-```sql
-SELECT * FROM users
-WHERE users.id = 1
-AND users.name = 'ALEX';
-```
-
----
-
-# Insert Queries
-
-## Insert Single Row
-
-```ts
+```typescript
 await db
   .insert(users)
-  .values(
-    {
-      id: 1,
-      name: "first",
-    }
-  )
+  .values({
+    name: "John Doe",
+    email: "john@example.com",
+  })
   .execute();
+// INSERT INTO users (name, email) VALUES ('John Doe', 'john@example.com');
 ```
 
-Generated SQL:
+*(Note: Bulk inserts are coming in a future update!)*
 
-```sql
-INSERT INTO users (name, email)
-VALUES ('john', 'john@gmail.com');
-```
+### Update Queries
 
----
-
-## Insert Multiple Rows - future update 
-
-```ts
-await db
-  .insert(users)
-  .values([
-    {
-      name: "John",
-      email: "john@gmail.com",
-    },
-    {
-      name: "Alex",
-      email: "alex@gmail.com",
-    },
-  ]);
-```
-
----
-
-# Update Queries
-
-```ts
+```typescript
 await db
   .update(users)
-  .set({
-    name: "updated",
-  })
+  .set({ name: "Updated Name" })
   .where(eq(users.columns.id, 1))
   .execute();
 ```
 
-Generated SQL:
+### Delete Queries
 
-```sql
-UPDATE users
-SET name = 'Updated Name'
-WHERE users.id = 1;
-```
-
----
-
-# Delete Queries
-
-```ts
+```typescript
 await db
   .delete()
   .from(users)
@@ -318,200 +192,85 @@ await db
   .execute();
 ```
 
-Generated SQL:
+### Advanced Operations
 
-```sql
-DELETE FROM users
-WHERE users.id = 1;
-```
+#### Sorting & Pagination
 
----
+```typescript
+import { asc, desc } from "corem/utils";
 
-# Order By
-
-```ts
-const result = await db
+const paginatedUsers = await db
   .select()
   .from(users)
-  .orderBy(
-    desc(users.id),
-    asc(users.name),
-  );
+  .orderBy(desc(users.columns.createdAt), asc(users.columns.name))
+  .limit(10)
+  .execute();
 ```
 
-Generated SQL:
+#### Joins
 
-```sql
-SELECT * FROM users
-ORDER BY users.id DESC, users.name ASC;
-```
+Corem supports type-safe SQL joins:
 
----
-
-# Limit
-
-```ts
-const result = await db
+```typescript
+// Inner Join
+const userPosts = await db
   .select()
   .from(users)
-  .limit(10);
-```
+  .innerJoin(posts, eq(users.columns.id, posts.columns.userId))
+  .execute();
 
-Generated SQL:
-
-```sql
-SELECT * FROM users LIMIT 10;
-```
-
----
-
-# Joins
-
-## Inner Join
-
-```ts
-const result = await db
+// Left Join
+const usersWithOptionalPosts = await db
   .select()
   .from(users)
-  .innerJoin(posts, eq(users.id, posts.userId));
-```
-
-Generated SQL:
-
-```sql
-SELECT * FROM users
-INNER JOIN posts
-ON users.id = posts.user_id;
+  .leftJoin(posts, eq(users.columns.id, posts.columns.userId))
+  .execute();
 ```
 
 ---
 
-## Left Join
+## 🏗️ Supported Column Constraints
 
-```ts
-const result = await db
-  .select()
-  .from(users)
-  .leftJoin(posts, eq(users.id, posts.userId));
-```
+Define database constraints smoothly via chained methods:
 
-Generated SQL:
-
-```sql
-SELECT * FROM users
-LEFT JOIN posts
-ON users.id = posts.user_id;
-```
+- `.primaryKey()` - Sets column as primary key.
+- `.autoIncrement()` - Makes an integer column auto-increment.
+- `.notNull()` - Marks column as required (NOT NULL).
+- `.unique()` - Adds a unique constraint.
+- `.defaultNow()` - Sets the default value to current timestamp.
+- `.references(() => column, { onDelete: 'cascade' })` - Sets up a foreign key.
 
 ---
 
-# Foreign Keys
+## 🗺️ Roadmap
 
-```ts
-export const posts = mysqlTable("posts", {
-  id: int("id")
-    .primaryKey()
-    .autoIncrement(),
+Corem is actively evolving. Here is what we have planned:
 
-  title: varchar("title", 255)
-    .notNull(),
-
-  userId: int("user_id")
-    .references(() => users.id, {
-      onDelete: "cascade",
-    }),
-});
-```
+- PostgreSQL & SQLite Support
+- Advanced Migration History System
+- Complex Relational Fetching API
+- Query Logging & Profiling
+- Database Transactions
+- Automatic Schema Introspection
 
 ---
 
-# Constraints
+## 🤝 Contributing
 
-## Primary Key
-
-```ts
-int("id")
-  .primaryKey();
-```
-
-## Auto Increment
-
-```ts
-int("id")
-  .autoIncrement();
-```
-
-## Not Null
-
-```ts
-varchar("name", 255)
-  .notNull();
-```
-
-## Unique
-
-```ts
-varchar("email", 255)
-  .unique();
-```
-
-## Default
-
-```ts
-timestamp("created_at")
-  .defaultNow();
-```
-
-```txt
-src/
-├── db/
-│   ├── index.ts
-│   └── schema.ts
-├── routes/
-├── services/
-└── app.ts
-```
-
----
-
-# Why Corem?
-
-Corem is designed for developers who want:
-
-* Type safety without complexity
-* SQL-like syntax
-* Lightweight architecture
-* Fast query building
-* Full TypeScript support
-* Better developer experience
-
----
-
-# Roadmap
-
-* [ ] PostgreSQL support
-* [ ] SQLite support
-* [ ] Migration system
-* [ ] Relation API
-* [ ] CLI tools
-* [ ] Query logging
-* [ ] Transactions
-* [ ] Schema introspection
-
----
-
-# Contributing
-
-Contributions are welcome.
+We welcome community contributions! To get started:
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to your branch
-5. Open a pull request
+2. Create a new feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ---
 
-# License
+## 📄 License
 
-MIT
+This project is licensed under the [ISC License](./LICENSE).
+
+---
+
+*Built with ❤️ for the TypeScript ecosystem.*
