@@ -1,4 +1,4 @@
-import { defineConfig } from "corem/config";
+import { defineConfig } from "@himanshupadecha/corem/config";
 import "dotenv/config.js"
 
 export default defineConfig({
