@@ -55,7 +55,7 @@ DB_NAME=my_database
 Create a `corem.config.ts` file in your project root to tell the CLI where your schema lives and how to connect to the database.
 
 ```typescript
-import { defineConfig } from "corem/config";
+import { defineConfig } from "@himanshupadecha/corem/config";
 
 export default defineConfig({
   schema: "src/db/schema.ts",
@@ -74,17 +74,17 @@ export default defineConfig({
 Define your tables using Corem's type-safe schema builder. Create `src/db/schema.ts`:
 
 ```typescript
-import { int, varchar, text, timestamp } from "corem/columns";
-import { Table } from "corem/core";
+import { int, varchar, text, timestamp } from "@himanshupadecha/corem";
+import { sqlTable } from "@himanshupadecha/corem";
 
-export const users = Table("users", {
+export const users = sqlTable("users", {
   id: int("id").primaryKey().autoIncrement().notNull(),
   name: varchar("name", 255).notNull(),
   email: varchar("email", 255).notNull().unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const posts = Table("posts", {
+export const posts = sqlTable("posts", {
   id: int("id").primaryKey().autoIncrement(),
   title: varchar("title", 255).notNull(),
   userId: int("user_id")
@@ -106,7 +106,7 @@ npx corem push
 Create an instance of the database to execute queries. Create `src/db/index.ts`:
 
 ```typescript
-import { corem } from "corem";
+import { corem } from "@himanshupadecha/corem";
 
 // Initialize and export the database connection
 export const db = await corem();
@@ -143,7 +143,7 @@ const result = await db
 #### Where Conditions
 
 ```typescript
-import { eq, and } from "corem/utils";
+import { eq, and } from "@himanshupadecha/corem";
 
 const result = await db
   .select()
@@ -197,7 +197,7 @@ await db
 #### Sorting & Pagination
 
 ```typescript
-import { asc, desc } from "corem/utils";
+import { asc, desc } from "@himanshupadecha/corem";
 
 const paginatedUsers = await db
   .select()
