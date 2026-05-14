@@ -26,13 +26,13 @@ Install `corem` alongside its peer dependencies (such as `mysql2` if you haven't
 
 ```bash
 # Using npm
-npm install corem
+npm install @himanshupadecha/corem
 
 # Using yarn
-yarn add corem
+yarn add @himanshupadecha/corem
 
 # Using pnpm
-pnpm add corem
+pnpm add @himanshupadecha/corem
 ```
 
 ---
