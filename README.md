@@ -9,6 +9,8 @@
 
 **Corem** is a powerful, minimal, and fully type-safe ORM built specifically for TypeScript and MySQL. Inspired by modern tooling like Drizzle, it provides a fluent SQL-like query builder, strong schema inference, and seamless migration commands—all without the bloated overhead.
 
+> 📚 **[Read the Official Documentation](https://corem-documentation.vercel.app)** for in-depth guides, API reference, and examples!
+
 ## ✨ Features
 
 - 🔒 **End-to-End Type Safety** - Catch errors at compile-time with strong TypeScript inference.
