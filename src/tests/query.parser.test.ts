@@ -4,9 +4,8 @@ import { getPool } from "@/db/index.js";
 import { posts, users } from "@/db/schema.js";
 import { sqlToTsTypes } from "@/types/query-parser.js";
 
+const db = corem();
 test("simple query", async () => {
-  const db = await corem();
-
   try {
     const dbUsers = await db
       .select({ userId: users.columns.id, username: users.columns.name })
@@ -24,12 +23,19 @@ test("simple query", async () => {
 });
 
 test("update testing", async () => {
-  const db = await corem();
-
   try {
     // await db.insert(users).values({ id: 12, name: "first" }).execute();
 
     // await db.delete().from(users).where(eq(users.columns.id, 10)).execute();
+
+    const date = new Date();
+
+    await db
+      .insert(users)
+      .values({
+        
+      })
+      .execute();
 
     const [updatedUser] = await db
       .update(users)

@@ -20,7 +20,7 @@ export abstract class BaseSelectionBuilder<TResult> {
   protected groupByColumn?: FinalColumn;
   protected havingCondition?: whereClause;
 
-  constructor(protected pool: Pool) {}
+  constructor(protected poolPromise: Promise<Pool>) {}
 
   limit(no: number): this {
     this.limitNo = no;
@@ -189,10 +189,10 @@ export class SelectBuilder<
   S extends Record<string, FinalColumn> = Record<string, FinalColumn>,
 > extends BaseSelectionBuilder<InferSelection<S>> {
   constructor(
-    pool: Pool,
+    poolPromise: Promise<Pool>,
     private selection: S,
   ) {
-    super(pool);
+    super(poolPromise);
   }
 
   from<U extends Record<string, FinalColumn>>(table: Table<U>): this {
@@ -201,6 +201,7 @@ export class SelectBuilder<
   }
 
   async execute(): Promise<InferSelection<S>[]> {
+    const pool = await this.poolPromise
     const cols = Object.entries(this.selection)
       .map(([alias, col]) => {
         return `${col.table}.${col.name} AS ${alias}`;
@@ -210,7 +211,7 @@ export class SelectBuilder<
     let sql = `SELECT ${cols} FROM ${this._tableName} ${this.joinsParser()} ${this.whereParser()} ${this.groupByParser()} ${this.havingParser()} ${this.orderParser()} ${this.limitParser()};`;
 
     const [rows] =
-      await this.pool.query<(InferSelection<S> & RowDataPacket)[]>(sql);
+      await pool.query<(InferSelection<S> & RowDataPacket)[]>(sql);
 
     // this.pool.end();
 
@@ -219,12 +220,12 @@ export class SelectBuilder<
 }
 
 export class StarBuilder {
-  constructor(private pool: Pool) {}
+  constructor(private poolPromise: Promise<Pool>) {}
 
   from<U extends Record<string, Column>>(
     table: Table<U>,
   ): StarSelectBuilder<U> {
-    return new StarSelectBuilder(this.pool, table);
+    return new StarSelectBuilder(this.poolPromise, table);
   }
 }
 
@@ -232,16 +233,17 @@ export class StarSelectBuilder<
   U extends Record<string, Column>,
 > extends BaseSelectionBuilder<InferRow<U>> {
   constructor(
-    pool: Pool,
+    poolPromise: Promise<Pool>,
     private table: Table<U>,
   ) {
-    super(pool);
+    super(poolPromise);
   }
 
   async execute(): Promise<InferRow<U>[]> {
+    const pool = await this.poolPromise
     let sql = `SELECT * FROM ${this.table.name} ${this.joinsParser()} ${this.whereParser()} ${this.groupByParser()} ${this.havingParser()} ${this.orderParser()} ${this.limitParser()};`;
 
-    const [rows] = await this.pool.query<(InferRow<U> & RowDataPacket)[]>(sql);
+    const [rows] = await pool.query<(InferRow<U> & RowDataPacket)[]>(sql);
 
     // this.pool.end()
 

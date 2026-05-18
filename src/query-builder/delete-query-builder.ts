@@ -13,12 +13,12 @@ export class DeleteBuilder<
   private condition?: whereClause;
   private isReturning: boolean = false;
 
-  constructor(private pool: Pool) {}
+  constructor(private poolPromise: Promise<Pool>) {}
 
   from<U extends Record<string, Column>>(
     table: Table<U>,
   ): DeleteBuilder<U> {
-    const next = new DeleteBuilder<U>(this.pool);
+    const next = new DeleteBuilder<U>(this.poolPromise);
     next._tableName = table.name;
     return next;
   }
@@ -71,17 +71,19 @@ export class DeleteBuilder<
   async execute(): Promise<R extends "yes" ? InferRow<T>[] : null> {
     let deletedRows: InferRow<T>[] = [];
 
+    const pool = await this.poolPromise
+
     if (this.isReturning) {
       const selectsql = `SELECT * FROM ${this._tableName} ${this.whereParser()};`;
 
       const [rows] =
-        await this.pool.query<(InferRow<T> & RowDataPacket)[]>(selectsql);
+        await pool.query<(InferRow<T> & RowDataPacket)[]>(selectsql);
 
       deletedRows = rows;
     }
     let sql = `DELETE FROM ${this._tableName} ${this.whereParser()};`;
 
-    await this.pool.query(sql);
+    await pool.query(sql);
 
     // this.pool.end()
 

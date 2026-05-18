@@ -1,4 +1,5 @@
 import { Column, FinalColumn, FkeyDelete } from "@/types/column.js";
+import { Constraint } from "@/types/constraints.js";
 
 
 export type FkeyOnDeleteObj = {

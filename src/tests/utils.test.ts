@@ -1,4 +1,5 @@
 import { closePool } from "@/db/index.js";
+import { users } from "@/db/schema.js";
 import {
   deleteFkConstraintsFirstBeforeDeletingColumn,
   dropForeignKeyConstraintIfExists,

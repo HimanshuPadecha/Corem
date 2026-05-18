@@ -6,7 +6,7 @@ import { InsertBuilder } from "./insert-query-builder.js";
 import { UpdateBuilder } from "./update-query-builder.js";
 
 export class QueryBuilder {
-  constructor(private pool: Pool) {}
+  constructor(private poolPromise: Promise<Pool>) {}
 
   select(): StarBuilder;
   select<S extends Record<string, FinalColumn>>(selection: S): SelectBuilder<S>;
@@ -14,27 +14,27 @@ export class QueryBuilder {
     selection?: S,
   ): SelectBuilder<S> | StarBuilder {
     if (selection) {
-      return new SelectBuilder(this.pool, selection);
+      return new SelectBuilder(this.poolPromise, selection);
     }
 
-    return new StarBuilder(this.pool);
+    return new StarBuilder(this.poolPromise);
   }
 
   delete(): DeleteBuilder<Record<string, FinalColumn>> {
-    return new DeleteBuilder(this.pool);
+    return new DeleteBuilder(this.poolPromise);
   }
 
   insert<T extends Record<string, Column>>(table: {
     name: string;
     columns: { [K in keyof T]: FinalColumn<T[K]> };
-  }): InsertBuilder<{ [K in keyof T]: FinalColumn<T[K]> }> {
-    return new InsertBuilder(this.pool, table);
+  }): InsertBuilder<T> {
+    return new InsertBuilder(this.poolPromise, table);
   }
 
   update<T extends Record<string, Column>>(table: {
     name: string;
     columns: { [K in keyof T]: FinalColumn<T[K]> };
   }) {
-    return new UpdateBuilder(this.pool, table);
+    return new UpdateBuilder(this.poolPromise, table);
   }
 }

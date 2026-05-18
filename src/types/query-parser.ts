@@ -1,4 +1,6 @@
+import { users } from "@/db/schema.js";
 import { Column, FinalColumn } from "./column.js";
+import { Constraint } from "./constraints.js";
 import { Table } from "./table.js";
 
 export type sqlToTsTypes<T extends string> = T extends "INT"
@@ -47,4 +49,33 @@ export type Join<T extends Record<string, FinalColumn>> = {
   table: Table<T>;
   alias?: string;
   condition: Condition;
+};
+
+type HasConstraint<
+  C extends Column,
+  CT extends Constraint,
+> = CT extends C["constraints"][number] ? true : false;
+
+type IsServerProvided<C extends Column> =
+  "AUTO_INCREMENT" extends C["constraints"][number]
+    ? true
+    : C["constraints"][number] extends `DEFAULT ${infer _}`
+      ? true
+      : false;
+
+type IsRequired<C extends Column> =
+  IsServerProvided<C> extends true
+    ? false
+    : "NOT NULL" extends C["constraints"][number]
+      ? true
+      : false;
+
+export type InferInsertValues<U extends Record<string, Column>> = {
+  [K in keyof U as IsRequired<U[K]> extends true ? K : never]: sqlToTsTypes<
+    U[K]["type"]
+  >;
+} & {
+  [K in keyof U as IsRequired<U[K]> extends false ? K : never]?: sqlToTsTypes<
+    U[K]["type"]
+  > | null;
 };

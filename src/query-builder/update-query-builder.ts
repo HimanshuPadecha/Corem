@@ -14,7 +14,7 @@ export class UpdateBuilder<
   isReturning: boolean = false;
 
   constructor(
-    private pool: Pool,
+    private poolPromise: Promise<Pool>,
     private table: Table<T>,
   ) {}
 
@@ -76,13 +76,15 @@ export class UpdateBuilder<
       });
     }
 
+    const pool = await this.poolPromise
+
     const entries = Object.entries(this.setObj);
     const cols = entries.map(([key]) => `${key} = ?`).join(", ");
     const params = entries.map(([, value]) => value);
 
     const sql = `UPDATE ${this.table.name} SET ${cols} ${this.whereParser()}`;
 
-    await this.pool.query(sql,params);
+    await pool.query(sql,params);
 
     let rows: InferRow<T>[] = [];
 
@@ -90,7 +92,7 @@ export class UpdateBuilder<
       let sql = `SELECT * FROM ${this.table.name} ${this.whereParser()};`;
 
       let [updatedRows] =
-        await this.pool.query<(InferRow<T> & RowDataPacket)[]>(sql);
+        await pool.query<(InferRow<T> & RowDataPacket)[]>(sql);
 
       rows = updatedRows;
     }

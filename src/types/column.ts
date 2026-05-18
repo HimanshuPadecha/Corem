@@ -1,9 +1,9 @@
 import { Constraint } from "./constraints.js";
 
-export type Column<T extends string = string> = {
+export type Column<T extends string = string, C extends Constraint[] = Constraint[]> = {
   name: string;
   type: T;
-  constraints: Constraint[];
+  constraints: C;
   fkey?: {
     far: FinalColumn;
     onDelete?: FkeyDelete;

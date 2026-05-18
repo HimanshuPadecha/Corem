@@ -37,3 +37,13 @@ export const closePool = async () => {
   await pool.end();
   pool = null;
 };
+
+let poolPromise: Promise<Pool> | null = null;
+
+export const getPoolPromise = () => {
+  if (!poolPromise) {
+    poolPromise = getPool();
+  }
+
+  return poolPromise;
+};

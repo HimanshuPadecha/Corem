@@ -2,7 +2,7 @@ export * from "@/columns/index.js";
 
 export * from "@/core/corem.js";
 
-export * from "@/core/define-config.js";
+// export * from "@/core/define-config.js";
 
 export * from "@/core/query-utils.js";
 

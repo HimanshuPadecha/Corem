@@ -5,7 +5,7 @@ export interface Int extends Column<"INT">, ConstraintMethods<Int> {
   autoIncrement: () => Int;
   default: (num: number) => Int;
 }
-
+  
 export const int = (name: string): Int => {
   const base: Column = {
     name,
