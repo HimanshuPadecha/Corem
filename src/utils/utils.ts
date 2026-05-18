@@ -72,20 +72,26 @@ export class Console {
     );
   }
 }
-
 export const getConfig = async (): Promise<CoremConfig> => {
   const root = process.cwd();
 
-  if (!fs.existsSync(path.join(root, "corem.config.ts"))) {
+  const tsConfig = path.join(root, "corem.config.ts");
+  const jsConfig = path.join(root, "corem.config.js");
+
+  const configPath = fs.existsSync(tsConfig)
+    ? tsConfig
+    : fs.existsSync(jsConfig)
+      ? jsConfig
+      : null;
+
+  if (!configPath) {
     throw new CoremError({
       code: "NOT_FOUND",
-      message: "Config not found",
+      message: "Config not found (corem.config.ts or corem.config.js)",
     });
   }
 
-  const coremConfig = (await jiti.import(
-    path.join(root, "corem.config.ts"),
-  )) as CoremConfig;
+  const coremConfig = (await jiti.import(configPath)) as CoremConfig;
 
   validateConfig(coremConfig);
 

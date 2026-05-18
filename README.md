@@ -111,7 +111,7 @@ Create an instance of the database to execute queries. Create `src/db/index.ts`:
 import { corem } from "@himanshupadecha/corem";
 
 // Initialize and export the database connection
-export const db = await corem();
+export const db = corem();
 ```
 
 ---
